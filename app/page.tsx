@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./home.css";
 
 export const metadata: Metadata = {
   title: "فروشگاه تخصصی ابزارآلات",
