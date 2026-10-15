@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./home.css";
+import ProductCard from "@/components/product-card";
+import { demoProducts } from "@/lib/demo-products";
 
 export const metadata: Metadata = {
   title: "فروشگاه تخصصی ابزارآلات",
@@ -77,7 +79,7 @@ export default function Home() {
 
         <nav className="category-nav" aria-label="منوی اصلی">
           <div className="container nav-inner">
-            <a href="#categories" className="nav-categories"><span>☷</span> دسته‌بندی محصولات</a>
+            <a href="#categories" className="nav-categories"><span>☷</span> دسته‌بندی محصولات</a><a href="/products">همه محصولات</a>
             <a href="#categories">ابزار برقی</a><a href="#categories">ابزار دستی</a><a href="#categories">ابزار اندازه‌گیری</a><a href="#categories">ایمنی و حفاظت</a>
             <a href="#guide">راهنمای خرید</a>
             <span className="nav-spacer" />
@@ -137,6 +139,17 @@ export default function Home() {
               </a>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="featured-section section-pad">
+        <div className="container">
+          <div className="section-heading">
+            <div><span className="eyebrow">منتخب‌های نمایشی</span><h2>چند ابزار برای شروع</h2><p>کاتالوگ نمونه برای دیدن مسیر انتخاب و افزودن به سبد خرید.</p></div>
+            <a href="/products" className="text-link">مشاهده همه محصولات <ArrowIcon /></a>
+          </div>
+          <div className="product-grid">{demoProducts.slice(0, 3).map((product) => <ProductCard key={product.id} product={product} />)}</div>
+          <p className="home-demo-note">محصولات، قیمت‌ها و موجودی‌های این نسخه نمونه‌اند و برای فروش واقعی استفاده نمی‌شوند.</p>
         </div>
       </section>
 
