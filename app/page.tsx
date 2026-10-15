@@ -3,6 +3,7 @@ import "./home.css";
 import "./shop.css";
 import ProductCard from "@/components/product-card";
 import { demoProducts } from "@/lib/demo-products";
+import CartIndicator from "@/components/cart-indicator";
 
 export const metadata: Metadata = {
   title: "فروشگاه تخصصی ابزارآلات",
@@ -73,7 +74,7 @@ export default function Home() {
               <span className="action-icon">♙</span><span><small>خوش آمدید</small><strong>ورود / حساب من</strong></span>
             </a>
             <a className="cart-action" href="/cart" aria-label="سبد خرید">
-              <span className="cart-symbol">▱</span><span className="cart-count">۰</span>
+              <span className="cart-symbol">▱</span><CartIndicator />
             </a>
           </div>
         </div>
