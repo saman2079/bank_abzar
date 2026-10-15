@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./home.css";
+import "./shop.css";
 import ProductCard from "@/components/product-card";
 import { demoProducts } from "@/lib/demo-products";
 
