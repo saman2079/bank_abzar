@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# بانک ابزار
 
-## Getting Started
+فروشگاه فارسی ابزارآلات با Next.js App Router، React، TypeScript و Tailwind CSS.
 
-First, run the development server:
+## وضعیت پروژه
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+پیاده‌سازی در شاخه claude/bank-abzar-store-implementation انجام می‌شود. علاوه بر صفحه اصلی، کاتالوگ نمونه، جست‌وجو، صفحه جزئیات محصول، دسته‌بندی‌ها، سبد خرید نمایشی، صفحه حساب کاربری، راهنماها و تماس ایجاد شده‌اند. توابع مستقل دامنه، نرمال‌سازی فارسی و پول، Migration SQL اولیه، نمونه متغیرهای محیطی، Docker/Compose و گردش CI نیز وجود دارند.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**این پروژه هنوز فروشگاه عملیاتی کامل یا آماده Production نیست.** محصولات و قیمت‌های فعلی نمونه‌اند؛ سبد خرید فقط در localStorage مرورگر کار می‌کند. اتصال دیتابیس، اجرای migration، احراز هویت واقعی، APIهای فروشگاهی، checkout، پرداخت، انبارداری متصل به دیتابیس، پنل مدیریت و CMS مقالات هنوز پیاده‌سازی یا اعتبارسنجی نشده‌اند. هیچ سفارش یا پرداخت واقعی انجام نمی‌شود.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+جزئیات در docs/implementation-status.md، docs/phase-1-audit-and-architecture.md و db/migrations/README.md آمده است.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## اجرای محلی
 
-## Learn More
+پیش‌نیازها: نسخه Node.js سازگار با Next.js، npm registry قابل دسترس و Docker با Compose (برای PostgreSQL محلی).
 
-To learn more about Next.js, take a look at the following resources:
+1. فایل .env.example را به .env کپی و POSTGRES_PASSWORD را با مقدار تصادفی قوی جایگزین کنید. این فایل محلی را Commit نکنید.
+2. برای دیتابیس محلی، docker compose up -d db را اجرا کنید.
+3. وابستگی‌ها را با npm ci نصب کنید.
+4. سرور توسعه را با npm run dev اجرا کنید.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Migration فعلی را فقط روی دیتابیس توسعه خالی و پس از بررسی اجرا کنید؛ دستور نمونه در db/migrations/README.md است. برنامه هنوز migration را خودکار اجرا نمی‌کند.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## اعتبارسنجی
 
-## Deploy on Vercel
+Workflow GitHub Actions تعریف شده است تا npm ci، ESLint، TypeScript و production build را اجرا کند. در این نشست این فرمان‌ها و Docker اجرا نشده‌اند؛ بنابراین نتیجه موفقیت CI، Build، lint، type-check یا migration تأیید نشده است. هنوز تست‌های واحد/یکپارچگی/E2E تعریف نشده‌اند.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## اصول پروژه
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- تمام صفحات عمومی فارسی و RTL هستند.
+- قیمت داخلی با عدد صحیح تومان نمایش/محاسبه می‌شود؛ تبدیل به ریال فقط در مرز درگاه انجام می‌شود.
+- قیمت/موجودی درخواست کلاینت منبع حقیقت نیست.
+- تغییر سفارش، پرداخت و موجودی باید در سمت سرور، تراکنشی و قابل ردیابی باشد.
+- Secret واقعی نباید در Git قرار گیرد.
+- انتقال به master فقط طبق تأیید صریح مالک انجام می‌شود؛ نتیجه Build و CI باید جداگانه بررسی شود.
