@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# بانک ابزار
 
-## Getting Started
+فروشگاه فارسی ابزارآلات با Next.js App Router، React، TypeScript و Tailwind CSS.
 
-First, run the development server:
+## وضعیت فعلی
+
+این مخزن در حال پیاده‌سازی مرحله‌ای است. در حال حاضر پایه بصری صفحه اصلی و Design Tokens اولیه ایجاد شده‌اند؛ هنوز بک‌اند فروشگاه، دیتابیس، احراز هویت، سبد خرید واقعی، سفارش، انبارداری، پرداخت، پنل مدیریت و مقالات عملیاتی پیاده‌سازی نشده‌اند. محتوای دسته‌بندی‌های فعلی صرفاً برای نمایش طراحی صفحه است و منبع داده فروشگاهی نیست.
+
+گزارش جزئی‌تر در [docs/implementation-status.md](docs/implementation-status.md) و ممیزی معماری در [docs/phase-1-audit-and-architecture.md](docs/phase-1-audit-and-architecture.md) قرار دارد.
+
+## پیش‌نیازها
+
+- نسخه Node.js سازگار با نسخه Next.js پروژه
+- دسترسی به رجیستری npm برای نصب وابستگی‌ها
+
+## اجرای محلی
+
+پس از دسترسی به رجیستری و نصب وابستگی‌ها:
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+سپس `http://localhost:3000` را باز کنید.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## فرمان‌های موجود
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev`: سرور توسعه
+- `npm run build`: ساخت production
+- `npm run start`: اجرای خروجی production
+- `npm run lint`: اجرای ESLint
 
-## Learn More
+فعلاً اسکریپت تست و type-check اختصاصی تعریف نشده است. این فرمان‌ها در این نشست اجرا نشده‌اند؛ بنابراین صحت Build، Lint و TypeScript هنوز تأیید نشده است.
 
-To learn more about Next.js, take a look at the following resources:
+## اصول پروژه
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- تمام صفحات عمومی فارسی و RTL هستند.
+- قیمت و موجودی در نهایت باید فقط از سمت سرور و دیتابیس معتبر محاسبه شوند.
+- عملیات سفارش، پرداخت و انبار باید تراکنشی و قابل ردیابی باشند.
+- هیچ Secret واقعی نباید در Git قرار گیرد.
+- هیچ تغییر این شاخه بدون تأیید صریح مالک به شاخه اصلی منتقل نمی‌شود.
