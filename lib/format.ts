@@ -13,3 +13,13 @@ export function discountPercent(price: number, compareAtPrice?: number): number 
   if (!compareAtPrice || compareAtPrice <= price) return 0;
   return Math.round((1 - price / compareAtPrice) * 100);
 }
+
+const faDateTime = new Intl.DateTimeFormat("fa-IR", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Asia/Tehran",
+});
+
+export function formatDateTime(value: Date): string {
+  return faDateTime.format(value);
+}

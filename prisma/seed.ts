@@ -61,18 +61,26 @@ async function main() {
         price: product.price,
         compareAtPrice: product.compareAtPrice ?? null,
         discountPercent: discountPercent(product.price, product.compareAtPrice),
-        stock: product.stock,
         status: "ACTIVE",
         specs: product.specs,
         ratingAvg: product.rating,
         ratingCount: product.ratingCount,
       } satisfies Prisma.ProductUncheckedCreateInput;
 
-      await prisma.product.upsert({
+      // موجودی فقط هنگام ساخت می‌آید؛ بازاجرای seed آن را دست نمی‌زند (منبع حقیقت: دفتر StockMovement).
+      const row = await prisma.product.upsert({
         where: { slug: product.slug },
         update: data,
-        create: data,
+        create: { ...data, stock: product.stock },
+        select: { id: true, stock: true },
       });
+
+      const hasLedger = (await prisma.stockMovement.count({ where: { productId: row.id } })) > 0;
+      if (!hasLedger && row.stock > 0) {
+        await prisma.stockMovement.create({
+          data: { productId: row.id, delta: row.stock, type: "INITIAL", note: "موجودی اولیه (seed)" },
+        });
+      }
     }
 
     process.stdout.write(

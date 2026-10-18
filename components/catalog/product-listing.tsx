@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { ProductGrid } from "@/components/shared/product-grid";
 import { formatNumber } from "@/lib/format";
@@ -53,7 +54,7 @@ export async function ProductListing({ searchParams, basePath, fixedCategory }: 
             جستجو
           </label>
           <Search className="text-muted pointer-events-none absolute start-4 top-1/2 size-4 -translate-y-1/2" aria-hidden />
-          <input id="f-q" name="q" defaultValue={query.q} placeholder="جستجوی نام یا برند..." className="ps-10" />
+          <Input id="f-q" name="q" defaultValue={query.q} placeholder="جستجوی نام یا برند..." className="ps-10" />
         </div>
 
         {!fixedCategory && (

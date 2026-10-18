@@ -56,14 +56,16 @@ function buildWhere(query: ProductListQuery): Prisma.ProductWhereInput {
 
   return {
     status: "ACTIVE",
-    ...(query.category && { category: { slug: query.category } }),
-    ...(query.brand && { brand: { name: query.brand } }),
-    ...(term && {
-      OR: [
-        { name: { contains: term, mode: "insensitive" } },
-        { brand: { name: { contains: term, mode: "insensitive" } } },
-      ],
-    }),
+    ...(query.category ? { category: { slug: query.category } } : {}),
+    ...(query.brand ? { brand: { name: query.brand } } : {}),
+    ...(term
+      ? {
+          OR: [
+            { name: { contains: term, mode: "insensitive" } },
+            { brand: { name: { contains: term, mode: "insensitive" } } },
+          ],
+        }
+      : {}),
   };
 }
 

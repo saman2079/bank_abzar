@@ -1,4 +1,4 @@
-import { Skeleton } from "../ui/Skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function ListingSkeleton() {
   return (

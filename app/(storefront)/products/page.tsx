@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ListingSkeleton } from "@/components/catalog/listing-skeleton";
 import { ProductListing } from "@/components/catalog/product-listing";
-import { Breadcrumbs } from "@/Pagination/shared/breadcrumbs";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 
 export const metadata: Metadata = {
   title: "فروشگاه ابزارآلات",

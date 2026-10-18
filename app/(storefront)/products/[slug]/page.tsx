@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Drill, ShieldCheck, ShoppingCart, Truck } from "lucide-react";
+import { Drill, ShieldCheck, Truck } from "lucide-react";
+import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { JsonLd } from "@/components/shared/json-ld";
 import { ProductGrid } from "@/components/shared/product-grid";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { discountPercent, formatNumber, formatToman } from "@/lib/format";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
@@ -96,11 +96,9 @@ export default async function ProductPage({ params }: { params: Params }) {
             {inStock ? "موجود در انبار" : "ناموجود"}
           </p>
 
-          {/* فعال‌سازی در فاز ۴ (سبد خرید) */}
-          <Button size="lg" className="mt-6 w-full md:w-auto" disabled={!inStock}>
-            <ShoppingCart className="size-5" aria-hidden />
-            {inStock ? "افزودن به سبد خرید" : "ناموجود"}
-          </Button>
+          <div className="mt-6">
+            <AddToCartButton productId={product.id} productName={product.name} inStock={inStock} variant="full" />
+          </div>
 
           <ul className="text-muted mt-8 space-y-3 text-sm">
             <li className="flex items-center gap-2">

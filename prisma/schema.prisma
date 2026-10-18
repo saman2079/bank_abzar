@@ -1,4 +1,4 @@
-// فاز ۲: کاتالوگ. فاز ۳: کاربر/OTP/سشن/آدرس. فاز ۴: سبد/سفارش/انبار. پرداخت و مقاله در فازهای بعد با migration جدا.
+// فاز ۲: کاتالوگ. فاز ۳: کاربر/OTP/سشن/آدرس. فاز ۴: سبد/سفارش/انبار. فاز ۵: پرداخت. فاز ۶: AuditLog (و بعداً Media/Setting). مقاله در فاز ۷.
 
 generator client {
   provider = "prisma-client"
@@ -231,6 +231,7 @@ model Order {
   items           OrderItem[]
   history         OrderStatusHistory[]
   movements       StockMovement[]
+  payments        Payment[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
 
@@ -292,4 +293,53 @@ model StockMovement {
 
   @@index([productId, createdAt])
   @@index([orderId])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  orderId     String
+  order       Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  gateway     String
+  /// شناسه‌ی تراکنش درگاه؛ یکتا — کلید idempotency callback
+  authority   String        @unique
+  /// تومان؛ از order.total در لحظه‌ی شروع پرداخت (هرگز از کلاینت)
+  amount      Int
+  status      PaymentStatus @default(PENDING)
+  /// کد پیگیری درگاه
+  refId       String?
+  /// شماره کارت ماسک‌شده
+  cardPan     String?
+  paidAt      DateTime?
+  /// پول دریافت شد ولی سفارش قابل بازگشایی نبود (لغو/تکراری)؛ ادمین باید دستی برگرداند
+  needsRefund Boolean       @default(false)
+  rawResponse Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([orderId])
+  @@index([status, createdAt])
+}
+
+/// ثبت تغییرات حساسِ پنل (قیمت، موجودی، وضعیت سفارش، کاربران). فقط append؛ هرگز ویرایش/حذف نمی‌شود.
+model AuditLog {
+  id         String   @id @default(cuid())
+  /// بدون FK تا با حذف/غیرفعال‌شدن کاربر سابقه نماند
+  actorId    String?
+  actorLabel String?
+  /// مثل product.update، stock.adjust، order.status
+  action     String
+  entity     String
+  entityId   String?
+  diff       Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entity, entityId])
 }

@@ -5,15 +5,23 @@
 
 **شیوه کار:** روی ریپوی کاربر کامیت/پوش نکن. فایل‌های کامل و آماده‌ی کپی‌پیست بده (کوتاه، بدون توضیح اضافه)، و بعد از هر تحویل کد همین چک‌لیست را آپدیت کن.
 
-**تحویل‌شده ولی هنوز تأیید نشده:** کد فاز ۰ و ۱ و ۲ تحویل شده، اما `lint`/`typecheck`/`build` هیچ‌وقت اجرا نشده (محیط Claude به npm دسترسی ندارد). اولین کار: خروجی `npm run lint && npm run typecheck && npm run build` را از کاربر بگیر، خطاها را رفع کن، سپس موارد تأییدشده را تیک بزن.
+**تحویل‌شده ولی هنوز تأیید نشده:** کد فاز ۰ تا ۵ تحویل شده، اما `lint`/`typecheck`/`build` هیچ‌وقت اجرا نشده (محیط Claude به npm دسترسی ندارد). اولین کار: خروجی `npm run lint && npm run typecheck && npm run build` را از کاربر بگیر، خطاها را رفع کن، سپس موارد تأییدشده را تیک بزن.
 
-**وابستگی‌های لازم** (کاربر باید نصب کرده باشد): `zod`, `lucide-react`, `@fontsource-variable/vazirmatn`, `server-only`, `@prisma/client@7`, `@prisma/adapter-pg`, `pg`, `dotenv`؛ و dev: `prettier`, `prisma@7`, `tsx`, `@types/pg`. اسکریپت‌های `postinstall` (`prisma generate`)، `db:up`, `db:migrate`, `db:deploy`, `db:seed`, `db:studio` و بلوک `"prisma"`/seed در package.json لازم است. `/generated` را به `.gitignore` اضافه کن. بعد از `db:migrate` پوشه‌ی `prisma/migrations` را کامیت کن. اسکریپت‌های `typecheck` (`tsc --noEmit`)، `format`، `format:check` باید در `package.json` باشند. فایل قدیمی `app/page.tsx` باید حذف شده باشد (صفحه اصلی در `app/(storefront)/page.tsx` است).
+**وابستگی‌های لازم** (کاربر باید نصب کرده باشد): `zod`, `lucide-react`, `@fontsource-variable/vazirmatn`, `server-only`, `@prisma/client@7`, `@prisma/adapter-pg`, `pg`, `dotenv`, `@node-rs/argon2`؛ و dev: `prettier`, `prisma@7`, `tsx`, `@types/pg`. اسکریپت‌های `postinstall` (`prisma generate`)، `db:up`, `db:migrate`, `db:deploy`, `db:seed`, `db:studio`, `admin:create` (`tsx prisma/create-admin.ts`), `check:concurrency` (`tsx --conditions=react-server --env-file=.env.local prisma/check-concurrency.ts`) و بلوک `"prisma"`/seed در package.json لازم است. `/generated` را به `.gitignore` اضافه کن. بعد از `db:migrate` پوشه‌ی `prisma/migrations` را کامیت کن. اسکریپت‌های `typecheck` (`tsc --noEmit`)، `format`، `format:check` باید در `package.json` باشند. فایل قدیمی `app/page.tsx` باید حذف شده باشد (صفحه اصلی در `app/(storefront)/page.tsx` است).
 
 **قرارداد کاتالوگ (از فاز ۲ با Prisma + `'use cache'`):** `modules/catalog/{constants,types,schemas,queries}.ts`؛ `mock-data.ts` فقط منبع seed است. توابع `queries.ts`: `listProducts` (جستجوی `q` کش نمی‌شود), `listFeaturedProducts`, `listBrands`, `listCategories`, `getProductBySlug`, `getRelatedProducts(slug)`, `getCategoryBySlug`, `listProductSlugs`. تگ‌ها در `lib/cache.ts`؛ بی‌اعتبارسازی: `updateTag(tag)` فقط در Server Action، `revalidateTag(tag,'max')` در Route Handler. چون `generateStaticParams` و صفحه‌ی اصلی از DB می‌خوانند، build به دیتابیس نیاز دارد (در CI: migrate+seed قبل از build). موجودی: `ProductDetail.stock` منبع حقیقت است و `inStock` از آن مشتق می‌شود.
 
+**احراز هویت (فاز ۳):** `modules/auth/{constants,types,schemas,otp,password,redirect,actions,argon2-options}.ts`, `lib/{session,dal,rate-limit,request,phone,form}.ts`, `lib/sms/{types,console,kavenegar,index}.ts`, `modules/users/{constants,types,schemas,queries,actions}.ts`. مدل‌ها: User, OtpCode, Session, Address, RateLimit (migration جدید با نام `auth`). مشتری فقط با OTP؛ ادمین/استاف فقط با رمز Argon2id در `/admin/login` (OTP برای نقش غیر از CUSTOMER رد می‌شود). نشست: توکن تصادفی، فقط SHA-256 در DB، کوکی `__Host-ba_session` (prod). `SESSION_SECRET` الان **اجباری** است (کلید HMAC کد OTP). `SMS_PROVIDER=console` در production ممنوع است. صفحه‌های login/account داخل `(storefront)` هستند (هدر/فوتر مشترک)؛ پنل ادمین `app/admin/(panel)` با گیت `requireStaff` و `app/admin/login` بیرون گیت. هر چیزی که کوکی می‌خواند باید داخل `<Suspense>` باشد (هدر: `AccountLink`). `proxy.ts` عمداً ساخته نشد؛ گیت واقعی در DAL است. پاک‌سازی OTP/نشست/RateLimit منقضی → کرون فاز ۴.
+
+**سبد/سفارش/انبار (فاز ۴):** `modules/cart/{constants,types,schemas,service,actions}.ts` (مهمان: کوکی `ba_cart`؛ لاگین: جدول CartItem؛ merge هنگام ورود در `verifyOtpAction`؛ قیمت/موجودی هرگز از کلاینت)، `modules/orders/{constants,schemas,types,service,queries,actions}.ts`. مدل‌ها: CartItem, Order, OrderItem, OrderStatusHistory, StockMovement (migration جدید `orders`). `placeOrder`: یک تراکنش با کسر اتمیک `updateMany where stock>=n and price=دیده‌شده`، قفل‌ها به ترتیب productId، ساخت سفارش PENDING_PAYMENT با `expiresAt` ۳۰ دقیقه، StockMovement نوع SALE، خالی‌کردن سبد. `cancelPendingOrder` idempotent است (شرط status در UPDATE) و موجودی را با ORDER_CANCEL برمی‌گرداند؛ کرون `POST /api/internal/cron` با `Authorization: Bearer $CRON_SECRET` سفارش‌های منقضی را لغو و OTP/نشست/RateLimit منقضی را پاک می‌کند (`CRON_SECRET` باید ست شود). صفحه‌ها: `/cart`, `/checkout`, `/account/orders`, `/account/orders/[id]`. هزینه ارسال (`SHIPPING` در `modules/orders/constants.ts`: ۸۰هزار تومان، رایگان بالای ۵ میلیون) **نمونه** است تا صاحب فروشگاه مشخص کند (فاز ۶ → Setting). دکمه‌ی پرداخت در صفحه‌ی سفارش غیرفعال است تا فاز ۵. `Order.paymentMethod`/`Payment` در فاز ۵ اضافه می‌شود. در فاز ۵ باید رقابت «پرداخت موفق بعد از انقضا/لغو» مدیریت شود.
+
+**پرداخت (فاز ۵، زرین‌پال واقعی — بدون sandbox به درخواست کاربر):** `lib/payments/{types,zarinpal,index}.ts` (اینترفیس `PaymentGateway`؛ آداپتر API v4: `api.zarinpal.com/pg/v4/payment/{request,verify}.json`، StartPay در `www.zarinpal.com/pg/StartPay/{authority}`، مبلغ به **ریال** = تومان×۱۰؛ endpointها/کدهای ۱۰۰/۱۰۱ و پارامترهای Authority/Status از مستندات رسمی تأیید شدند)، `modules/payments/{constants,schemas,service,actions}.ts`، `app/api/payments/zarinpal/callback/route.ts`. مدل `Payment` (authority یکتا = idempotency؛ `needsRefund`) — migration جدید `payments`. جریان: دکمه‌ی «پرداخت آنلاین» در `/account/orders/[id]` → `startPayment` (مبلغ از DB، مهلت سفارش حداقل ۲۰ دقیقه تمدید، سقف ۵ تلاش/سفارش) → درگاه → callback → verify سمت سرور → `settlePaid` (شرط `status != PAID` در UPDATE) → سفارش PAID + history. اگر پرداخت بعد از لغو/انقضا برسد: اگر موجودی باشد سفارش بازگشایی می‌شود وگرنه `needsRefund` (ادمین باید دستی برگرداند؛ نمایش در داشبورد فاز ۶). کرون هر ۵ دقیقه `reconcilePendingPayments` (پرداخت‌های PENDING قدیمی‌تر از ۲۰ دقیقه را verify می‌کند: مرورگر بسته‌شده بعد از پرداخت) قبل از `expireStaleOrders` اجرا می‌شود. `ZARINPAL_MERCHANT_ID` باید ۳۶ کاراکتر باشد؛ بدون آن پرداخت پیام «درگاه راه‌اندازی نشده» می‌دهد. ⚠️ زرین‌پال واقعی روی `localhost` و دامنه‌ی ثبت‌نشده callback نمی‌پذیرد → تست پرداخت فقط روی دامنه‌ی واقعی (Vercel/سرور) با پرداخت واقعی کم‌مبلغ؛ تأییدنشده: رفتار دقیق پاسخ خطای request/verify (parse محافظه‌کارانه نوشته شده). `SMS_PROVIDER=console` در production هنگام ارسال خطا می‌دهد (نه هنگام build)؛ برای تست روی دامنه‌ی واقعی کاوه‌نگار لازم است.
+
+**پنل ادمین (فاز ۶A):** مدل `AuditLog` (migration جدید `admin`). `lib/{audit,date,db-errors,query-params}.ts`، `modules/{catalog/admin,inventory,orders/admin,users/admin,dashboard,audit}`، `components/admin/*`، صفحات `/admin/{,products,categories,brands,inventory,orders,users,audit}`. دسترسی: STAFF = محصول/دسته/برند/انبار/سفارش؛ ADMIN = + کاربران و گزارش تغییرات (`requireAdmin`). محصول حذف نمی‌شود، فقط `ARCHIVED`. توضیح محصول فعلاً متن ساده است؛ مشخصات در textarea به‌صورت خطوط «عنوان: مقدار». تغییر قیمت/موجودی/وضعیت سفارش/کاربر در یک تراکنش با AuditLog ثبت می‌شود (رمز هرگز لاگ نمی‌شود). گذار وضعیت سفارش: `modules/orders/admin/transitions.ts`؛ پرداخت دستی/لغو/مرجوع دلیل اجباری دارد؛ لغو سفارش پرداخت‌شده موجودی را برمی‌گرداند ولی بازگشت وجه دستی از پنل زرین‌پال است. تأییدنشده: هیچ‌کدام از فایل‌های فاز ۳–۶ هنوز lint/typecheck/build نشده‌اند؛ `@node-rs/argon2` شاید نیاز به `serverExternalPackages` داشته باشد. مانده در ۶B: ثبت سفارش دستی، رسانه/تصاویر محصول، تنظیمات (انتقال `SHIPPING` به Setting).
+
 **قانون cacheComponents:** `searchParams` فقط داخل `<Suspense>` خوانده شود (`ProductListing`). `params` صفحه‌ی محصول/دسته بیرون Suspense و همراه `generateStaticParams` خوانده می‌شود تا slug ناموجود ۴۰۴ واقعی بدهد؛ سازگاری این الگو با Next 16.4 هنوز تأیید نشده و اگر build خطای blocking-route داد باید اصلاح شود.
 
-**نکته‌های باز:** `app/not-found.tsx` بدون هدر/فوتر است (۴۰۴ داخل storefront هم از همین می‌آید)؛ تصاویر محصول/هیرو placeholder هستند؛ دکمه‌های سبد و علاقه‌مندی فقط ظاهری‌اند تا فاز ۴؛ `Product` JSON-LD هنوز `image` ندارد.
+**نکته‌های باز:** `app/not-found.tsx` بدون هدر/فوتر است (۴۰۴ داخل storefront هم از همین می‌آید)؛ تصاویر محصول/هیرو placeholder هستند؛ دکمه‌های سبد و علاقه‌مندی فقط ظاهری‌اند تا فاز ۴؛ `Product` JSON-LD هنوز `image` ندارد. لینک «علاقه‌مندی» (`/account/wishlist`) هنوز صفحه ندارد. تأییدنشده‌ها در فاز ۳: آداپتر کاوه‌نگار با پنل واقعی؛ اینکه `@node-rs/argon2` خودکار external می‌شود (اگر build شکایت کرد `serverExternalPackages: ["@node-rs/argon2"]` را به `next.config.ts` اضافه کن)؛ رفتار `redirect()` داخل Suspense در لی‌اوت‌های account/admin. فقط توابع خالص (`phone.ts`, `redirect.ts`) واقعاً اجرا و تست شده‌اند.
 
 ## فاز ۰ — آماده‌سازی ریپو
 - [ ] کپی `CLAUDE.md` در ریشه و `ARCHITECTURE.md` + `CHECKLIST.md` در `docs/`
@@ -44,38 +52,38 @@
 - [x] اتصال صفحات فروشگاه به DB (صفحه‌ی اصلی async شد) — تأیید با اجرای واقعی مانده
 
 ## فاز ۳ — احراز هویت و حساب
-- [ ] اینترفیس SMS + یک provider (کاوه‌نگار/ملی‌پیامک/…)
-- [ ] OTP (hash، انقضا، تلاش، rate-limit)
-- [ ] سشن DB-backed + کوکی امن + logout
-- [ ] نقش‌ها و `requireUser/requireAdmin`
-- [ ] صفحه ورود/ثبت‌نام با شماره موبایل
-- [ ] پروفایل + مدیریت آدرس‌ها
-- [ ] ورود ادمین (رمز Argon2id)
+- [x] اینترفیس SMS + provider کنسول (dev) + کاوه‌نگار (تست‌نشده با پنل واقعی؛ از روی حافظه نوشته شده)
+- [x] OTP (HMAC، انقضا ۲ دقیقه، ۵ تلاش اتمیک، یک‌بارمصرف، rate-limit شماره/IP + cooldown)
+- [x] سشن DB-backed + کوکی امن + logout
+- [x] نقش‌ها و `requireUser/requireStaff/requireAdmin` (`lib/dal.ts`)
+- [x] صفحه ورود/ثبت‌نام با شماره موبایل (`/login`)
+- [x] پروفایل + مدیریت آدرس‌ها (`/account`, `/account/addresses`)
+- [x] ورود ادمین (رمز Argon2id، `/admin/login`، اسکریپت `admin:create`)
 
 ## فاز ۴ — سبد، سفارش، انبار
-- [ ] سبد (مهمان + لاگین + merge)
-- [ ] چک‌اوت: انتخاب/ثبت آدرس اجباری، هزینه ارسال
-- [ ] ساخت سفارش در تراکنش + کسر اتمیک موجودی + `StockMovement`
-- [ ] انقضای سفارش پرداخت‌نشده + کرون + برگشت موجودی
-- [ ] صفحه سفارش‌های من + timeline وضعیت
-- [ ] تست همزمانی انبار
+- [x] سبد (مهمان کوکی + لاگین DB + merge، شمارنده‌ی هدر، دکمه‌ی افزودن روی کارت/صفحه‌ی محصول)
+- [x] چک‌اوت: انتخاب/ثبت آدرس اجباری، هزینه ارسال (نمونه)
+- [x] ساخت سفارش در تراکنش + کسر اتمیک موجودی + `StockMovement`
+- [x] انقضای سفارش پرداخت‌نشده + کرون + برگشت موجودی (کرون روی سرور در فاز ۹ ست می‌شود)
+- [x] صفحه سفارش‌های من + timeline وضعیت + لغو سفارش در انتظار پرداخت
+- [x] اسکریپت تست همزمانی انبار روی DB واقعی (`npm run check:concurrency`) — اجرا و تأیید نشده؛ تست Vitest در فاز ۸
 
 ## فاز ۵ — پرداخت
-- [ ] interface `PaymentGateway` + adapter زرین‌پال
-- [ ] request/callback/verify + idempotency
-- [ ] صفحه نتیجه پرداخت (موفق/ناموفق)
+- [x] interface `PaymentGateway` + adapter زرین‌پال (production، بدون sandbox)
+- [x] request/callback/verify + idempotency + بازبینی کرون + بازگشایی/علامت‌گذاری بازگشت وجه
+- [x] نتیجه‌ی پرداخت (بنر موفق/ناموفق/در انتظار + کد پیگیری در صفحه‌ی سفارش)
 - [ ] (بعد) کارت‌به‌کارت با تأیید ادمین
 
 ## فاز ۶ — پنل ادمین
-- [ ] لی‌اوت ادمین + داشبورد (فروش، کمبود موجودی، سفارش‌های جدید)
-- [ ] CRUD محصول (تصاویر، مشخصات، SEO، وضعیت)
-- [ ] CRUD دسته‌بندی (درختی) و برند
-- [ ] انبار: لیست موجودی، افزایش/کاهش دستی با دلیل، تاریخچه
-- [ ] سفارش‌ها: لیست/فیلتر/جزئیات/تغییر وضعیت + History
+- [x] لی‌اوت ادمین + داشبورد (فروش، کمبود موجودی، سفارش‌های جدید، نیازمند بازگشت وجه)
+- [x] CRUD محصول (مشخصات، SEO، وضعیت) — مانده: تصاویر (فاز ۶B)
+- [x] CRUD دسته‌بندی (درختی) و برند
+- [x] انبار: لیست موجودی، افزایش/کاهش دستی با دلیل، تاریخچه
+- [x] سفارش‌ها: لیست/فیلتر/جزئیات/تغییر وضعیت + History
 - [ ] ثبت سفارش دستی برای مشتری تلفنی
-- [ ] کاربران: لیست، ساخت کاربر تلفنی، ویرایش، غیرفعال‌سازی
+- [x] کاربران: لیست، ساخت کاربر تلفنی/کارمند، ویرایش، غیرفعال‌سازی، تغییر رمز
 - [ ] مدیریت رسانه (آپلود، alt، sharp→WebP)
-- [ ] AuditLog + صفحه نمایش
+- [x] AuditLog + صفحه نمایش (فقط ادمین)
 - [ ] تنظیمات (هزینه ارسال، تماس، …)
 
 ## فاز ۷ — مقاله و سئو
@@ -92,7 +100,7 @@
 ## فاز ۸ — امنیت و کیفیت
 - [ ] هدرهای امنیتی + CSP
 - [ ] بررسی IDOR همه مسیرهای کاربر
-- [ ] rate-limit روی OTP/لاگین/آپلود/جستجو
+- [ ] rate-limit روی OTP ✓ / لاگین ادمین ✓ — مانده: آپلود/جستجو
 - [ ] تست‌های Vitest (انبار، سفارش، OTP، قیمت)
 - [ ] تست‌های Playwright (مسیر خرید، ادمین)
 - [ ] `npm audit` + Dependabot + secret scanning

@@ -1,6 +1,6 @@
 import type { CategorySummary, ProductDetail } from "./types";
 
-/** دیتای نمایشی فاز ۱؛ در فاز ۲ با کوئری Prisma جایگزین می‌شود. */
+/** دیتای اولیه؛ از فاز ۲ فقط منبع seed دیتابیس است (`prisma/seed.ts`) و در صفحه‌ها استفاده نمی‌شود. */
 export const mockCategories: CategorySummary[] = [
   { slug: "power-tools", name: "ابزار برقی" },
   { slug: "hand-tools", name: "ابزار دستی" },
@@ -256,7 +256,3 @@ export const mockProducts: ProductDetail[] = seeds.map((seed, index) => {
     inStock: stock > 0,
   };
 });
-
-export const mockFeaturedProducts: ProductDetail[] = mockProducts
-  .filter((product) => product.compareAtPrice && product.inStock)
-  .slice(0, 5);
