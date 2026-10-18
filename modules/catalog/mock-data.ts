@@ -1,0 +1,262 @@
+import type { CategorySummary, ProductDetail } from "./types";
+
+/** دیتای نمایشی فاز ۱؛ در فاز ۲ با کوئری Prisma جایگزین می‌شود. */
+export const mockCategories: CategorySummary[] = [
+  { slug: "power-tools", name: "ابزار برقی" },
+  { slug: "hand-tools", name: "ابزار دستی" },
+  { slug: "safety", name: "تجهیزات ایمنی" },
+  { slug: "machinery", name: "ماشین‌آلات" },
+  { slug: "accessories", name: "لوازم جانبی" },
+  { slug: "materials", name: "مصالح و نگهداری" },
+  { slug: "garden", name: "ابزار باغبانی" },
+  { slug: "paint", name: "رنگ و پوشش" },
+];
+
+type Seed = Pick<
+  ProductDetail,
+  "slug" | "name" | "brand" | "price" | "categorySlug" | "shortDescription" | "specs"
+> &
+  Partial<Pick<ProductDetail, "compareAtPrice" | "stock" | "rating" | "ratingCount">>;
+
+const seeds: Seed[] = [
+  {
+    slug: "dewalt-cordless-hammer-drill-18v",
+    name: "دریل بیج-کوبشی شارژی ۱۸ ولت",
+    brand: "DEWALT",
+    price: 9_490_000,
+    compareAtPrice: 11_160_000,
+    rating: 4.8,
+    ratingCount: 132,
+    categorySlug: "power-tools",
+    shortDescription: "دریل شارژی مناسب سوراخ‌کاری و پیچ‌بندی در کارگاه و پروژه‌های ساختمانی.",
+    specs: [
+      { label: "ولتاژ", value: "۱۸ ولت" },
+      { label: "نوع", value: "شارژی" },
+      { label: "کاربرد", value: "سوراخ‌کاری و پیچ‌بندی" },
+    ],
+  },
+  {
+    slug: "bosch-mini-grinder-1150w",
+    name: "مینی فرز ۱۱۵۰ وات",
+    brand: "BOSCH",
+    price: 6_490_000,
+    compareAtPrice: 7_060_000,
+    rating: 4.7,
+    ratingCount: 89,
+    categorySlug: "power-tools",
+    shortDescription: "مینی فرز برقی برای برش و سنباده‌کاری فلزات و سنگ.",
+    specs: [
+      { label: "توان", value: "۱۱۵۰ وات" },
+      { label: "نوع", value: "برقی" },
+    ],
+  },
+  {
+    slug: "stanley-pro-toolbox-25",
+    name: "جعبه ابزار حرفه‌ای ۲۵ اینچ",
+    brand: "STANLEY",
+    price: 1_990_000,
+    compareAtPrice: 2_160_000,
+    rating: 4.6,
+    ratingCount: 62,
+    categorySlug: "hand-tools",
+    shortDescription: "جعبه ابزار مقاوم برای نگهداری و حمل ابزار.",
+    specs: [
+      { label: "اندازه", value: "۲۵ اینچ" },
+      { label: "کاربرد", value: "نگهداری و حمل ابزار" },
+    ],
+  },
+  {
+    slug: "makita-circular-saw-185mm",
+    name: "اره گردبر ۱۸۵ میلی‌متر",
+    brand: "Makita",
+    price: 7_990_000,
+    compareAtPrice: 9_990_000,
+    rating: 4.8,
+    ratingCount: 96,
+    categorySlug: "power-tools",
+    shortDescription: "اره گردبر برقی برای برش دقیق چوب و ورق‌های چوبی.",
+    specs: [
+      { label: "قطر تیغه", value: "۱۸۵ میلی‌متر" },
+      { label: "نوع", value: "برقی" },
+    ],
+  },
+  {
+    slug: "bosch-mini-grinder-750w",
+    name: "مینی فرز ۷۵۰ وات",
+    brand: "BOSCH",
+    price: 5_890_000,
+    compareAtPrice: 6_690_000,
+    rating: 4.6,
+    ratingCount: 74,
+    categorySlug: "power-tools",
+    shortDescription: "مینی فرز سبک و مناسب کارهای روزمره‌ی کارگاهی.",
+    specs: [
+      { label: "توان", value: "۷۵۰ وات" },
+      { label: "نوع", value: "برقی" },
+    ],
+  },
+  {
+    slug: "safety-helmet-yellow",
+    name: "کلاه ایمنی صنعتی زرد",
+    brand: "ProSafe",
+    price: 450_000,
+    rating: 4.5,
+    ratingCount: 41,
+    categorySlug: "safety",
+    shortDescription: "کلاه ایمنی صنعتی برای محافظت از سر در محیط‌های کارگاهی.",
+    specs: [
+      { label: "رنگ", value: "زرد" },
+      { label: "کاربرد", value: "کارگاه و ساختمان" },
+    ],
+  },
+  {
+    slug: "safety-glasses-clear",
+    name: "عینک ایمنی شفاف ضدخش",
+    brand: "ProSafe",
+    price: 280_000,
+    rating: 4.4,
+    ratingCount: 58,
+    categorySlug: "safety",
+    shortDescription: "عینک ایمنی شفاف برای محافظت از چشم هنگام برشکاری و سنگ‌زنی.",
+    specs: [
+      { label: "رنگ لنز", value: "شفاف" },
+      { label: "ویژگی", value: "ضدخش" },
+    ],
+  },
+  {
+    slug: "cut-resistant-work-gloves",
+    name: "دستکش کار ضدبرش",
+    brand: "ProSafe",
+    price: 350_000,
+    compareAtPrice: 400_000,
+    rating: 4.5,
+    ratingCount: 33,
+    categorySlug: "safety",
+    shortDescription: "دستکش کار مقاوم برای کار با ابزار و قطعات تیز.",
+    specs: [
+      { label: "ویژگی", value: "ضدبرش" },
+      { label: "کاربرد", value: "کارگاه و مونتاژ" },
+    ],
+  },
+  {
+    slug: "stanley-ring-wrench-set-12",
+    name: "ست آچار رینگی-دوسر تخت ۱۲ عددی",
+    brand: "STANLEY",
+    price: 2_450_000,
+    compareAtPrice: 2_900_000,
+    rating: 4.7,
+    ratingCount: 77,
+    categorySlug: "hand-tools",
+    shortDescription: "ست آچار کامل برای تعمیرات خودرو و کارهای مکانیکی.",
+    specs: [
+      { label: "تعداد", value: "۱۲ عدد" },
+      { label: "نوع", value: "رینگی-دوسر تخت" },
+    ],
+  },
+  {
+    slug: "stanley-forging-hammer-800g",
+    name: "چکش آهنگری ۸۰۰ گرمی",
+    brand: "STANLEY",
+    price: 690_000,
+    stock: 0,
+    rating: 4.6,
+    ratingCount: 25,
+    categorySlug: "hand-tools",
+    shortDescription: "چکش آهنگری با دسته‌ی مقاوم برای کارهای سنگین.",
+    specs: [
+      { label: "وزن سر", value: "۸۰۰ گرم" },
+      { label: "کاربرد", value: "آهنگری و کارگاهی" },
+    ],
+  },
+  {
+    slug: "garden-pruning-shear",
+    name: "قیچی هرس باغبانی",
+    brand: "GreenPro",
+    price: 520_000,
+    rating: 4.3,
+    ratingCount: 19,
+    categorySlug: "garden",
+    shortDescription: "قیچی هرس برای هرس شاخه‌های نازک و مراقبت از باغچه.",
+    specs: [
+      { label: "کاربرد", value: "هرس شاخه" },
+      { label: "نوع", value: "دستی" },
+    ],
+  },
+  {
+    slug: "electric-paint-spray-gun",
+    name: "پیستوله رنگ‌پاشی برقی",
+    brand: "BOSCH",
+    price: 3_200_000,
+    compareAtPrice: 3_600_000,
+    rating: 4.2,
+    ratingCount: 14,
+    categorySlug: "paint",
+    shortDescription: "پیستوله برقی برای رنگ‌آمیزی یکنواخت سطوح بزرگ.",
+    specs: [
+      { label: "نوع", value: "برقی" },
+      { label: "کاربرد", value: "رنگ‌پاشی" },
+    ],
+  },
+  {
+    slug: "metal-wood-drill-bit-set-19",
+    name: "ست مته ۱۹ عددی فلز و چوب",
+    brand: "BOSCH",
+    price: 1_150_000,
+    compareAtPrice: 1_350_000,
+    rating: 4.6,
+    ratingCount: 52,
+    categorySlug: "accessories",
+    shortDescription: "ست مته متنوع برای سوراخ‌کاری فلز و چوب.",
+    specs: [
+      { label: "تعداد", value: "۱۹ عدد" },
+      { label: "کاربرد", value: "فلز و چوب" },
+    ],
+  },
+  {
+    slug: "steel-measuring-tape-8m",
+    name: "متر فلزی ۸ متری",
+    brand: "STANLEY",
+    price: 380_000,
+    rating: 4.7,
+    ratingCount: 88,
+    categorySlug: "hand-tools",
+    shortDescription: "متر فلزی با قفل و بدنه‌ی مقاوم برای اندازه‌گیری دقیق.",
+    specs: [
+      { label: "طول", value: "۸ متر" },
+      { label: "جنس تسمه", value: "فلز" },
+    ],
+  },
+  {
+    slug: "air-compressor-50l",
+    name: "کمپرسور باد ۵۰ لیتری",
+    brand: "ProLine",
+    price: 11_800_000,
+    compareAtPrice: 13_500_000,
+    rating: 4.4,
+    ratingCount: 21,
+    categorySlug: "machinery",
+    shortDescription: "کمپرسور باد برای تأمین هوای فشرده‌ی ابزارهای بادی و رنگ‌پاشی.",
+    specs: [
+      { label: "حجم مخزن", value: "۵۰ لیتر" },
+      { label: "کاربرد", value: "ابزار بادی و رنگ‌پاشی" },
+    ],
+  },
+];
+
+export const mockProducts: ProductDetail[] = seeds.map((seed, index) => {
+  const stock = seed.stock ?? 25;
+  return {
+    id: `p${index + 1}`,
+    sku: `BA-${String(index + 1).padStart(4, "0")}`,
+    rating: 0,
+    ratingCount: 0,
+    description: seed.shortDescription,
+    ...seed,
+    stock,
+    inStock: stock > 0,
+  };
+});
+
+export const mockFeaturedProducts: ProductDetail[] = mockProducts
+  .filter((product) => product.compareAtPrice && product.inStock)
+  .slice(0, 5);

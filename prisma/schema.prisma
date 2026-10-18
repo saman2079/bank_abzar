@@ -1,0 +1,295 @@
+// فاز ۲: کاتالوگ. فاز ۳: کاربر/OTP/سشن/آدرس. فاز ۴: سبد/سفارش/انبار. پرداخت و مقاله در فازهای بعد با migration جدا.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Category {
+  id             String     @id @default(cuid())
+  parentId       String?
+  parent         Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children       Category[] @relation("CategoryTree")
+  name           String
+  slug           String     @unique
+  description    String?
+  image          String?
+  seoTitle       String?
+  seoDescription String?
+  sortOrder      Int        @default(0)
+  isActive       Boolean    @default(true)
+  products       Product[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([parentId])
+}
+
+model Brand {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  logo      String?
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id               String         @id @default(cuid())
+  sku              String         @unique
+  name             String
+  slug             String         @unique
+  brandId          String
+  brand            Brand          @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  categoryId       String
+  category         Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  shortDescription String
+  /// HTML پاک‌سازی‌شده (sanitize) — در پنل ادمین قبل از ذخیره پاک می‌شود
+  description      String
+  /// قیمت نهایی به تومان
+  price            Int
+  /// قیمت قبل از تخفیف به تومان
+  compareAtPrice   Int?
+  /// از روی price/compareAtPrice هنگام ذخیره محاسبه می‌شود (برای مرتب‌سازی)
+  discountPercent  Int            @default(0)
+  /// موجودی انبار. هرگز منفی نمی‌شود: کاهش فقط با UPDATE اتمیک `WHERE stock >= n` (فاز ۴)
+  stock            Int            @default(0)
+  lowStockThreshold Int           @default(3)
+  status           ProductStatus  @default(DRAFT)
+  /// آرایه‌ی [{ label, value }]
+  specs            Json           @default("[]")
+  seoTitle         String?
+  seoDescription   String?
+  ratingAvg        Float          @default(0)
+  ratingCount      Int            @default(0)
+  images           ProductImage[]
+  orderItems       OrderItem[]
+  stockMovements   StockMovement[]
+  cartItems        CartItem[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([categoryId, status])
+  @@index([brandId])
+  @@index([status, createdAt])
+  @@index([status, price])
+  @@index([status, discountPercent])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String
+  sortOrder Int     @default(0)
+
+  @@index([productId])
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+model User {
+  id              String    @id @default(cuid())
+  /// قالب استاندارد 09xxxxxxxxx (lib/phone.ts)
+  phone           String    @unique
+  name            String?
+  email           String?
+  role            Role      @default(CUSTOMER)
+  /// فقط ادمین/استاف (Argon2id). مشتری فقط با OTP وارد می‌شود.
+  passwordHash    String?
+  phoneVerifiedAt DateTime?
+  /// کاربری که ادمین تلفنی ساخته؛ تا اولین ورود با OTP تأیید نشده است
+  createdByAdmin  Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  sessions        Session[]
+  addresses       Address[]
+  orders          Order[]
+  cartItems       CartItem[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([role])
+}
+
+model OtpCode {
+  id         String    @id @default(cuid())
+  phone      String
+  /// HMAC-SHA256(phone:code)؛ کد خام هرگز ذخیره نمی‌شود
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  ip         String?
+  createdAt  DateTime  @default(now())
+
+  @@index([phone, createdAt])
+  @@index([expiresAt])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// SHA-256 توکن کوکی؛ خود توکن ذخیره نمی‌شود
+  tokenHash String   @unique
+  expiresAt DateTime
+  userAgent String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Address {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receiverName  String
+  receiverPhone String
+  province      String
+  city          String
+  postalCode    String
+  street        String
+  plaque        String
+  unit          String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+/// شمارنده‌ی ساده‌ی rate-limit (کلید → تعداد در پنجره). اتمیک با SQL در lib/rate-limit.ts
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+
+  @@index([resetAt])
+}
+
+/// سبد کاربر لاگین‌شده. سبد مهمان در کوکی است و هنگام ورود merge می‌شود.
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELED
+  RETURNED
+}
+
+model Order {
+  id              String               @id @default(cuid())
+  /// شماره‌ی ترتیبی؛ برای نمایش با `formatOrderNumber` (۱۰۰۰ + number)
+  number          Int                  @unique @default(autoincrement())
+  userId          String
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  status          OrderStatus          @default(PENDING_PAYMENT)
+  /// همه‌ی مبالغ به تومان
+  subtotal        Int
+  shippingCost    Int
+  discount        Int                  @default(0)
+  total           Int
+  /// کپی آدرس در لحظه‌ی ثبت؛ با ویرایش/حذف آدرس کاربر عوض نمی‌شود
+  addressSnapshot Json
+  note            String?
+  /// مهلت پرداخت؛ بعد از آن کرون سفارش را لغو و موجودی را برمی‌گرداند
+  expiresAt       DateTime?
+  /// چه کسی ثبت کرده: خود مشتری یا ادمین (سفارش تلفنی)
+  createdById     String?
+  items           OrderItem[]
+  history         OrderStatusHistory[]
+  movements       StockMovement[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status, expiresAt])
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  nameSnapshot String
+  skuSnapshot  String
+  unitPrice    Int
+  quantity     Int
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderStatusHistory {
+  id          String       @id @default(cuid())
+  orderId     String
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  from        OrderStatus?
+  to          OrderStatus
+  changedById String?
+  note        String?
+  createdAt   DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+enum StockMovementType {
+  SALE
+  ORDER_CANCEL
+  MANUAL_IN
+  MANUAL_OUT
+  ADJUSTMENT
+  RETURN
+  INITIAL
+}
+
+/// دفتر کل موجودی (منبع حقیقت). `Product.stock` کش مجموع delta هاست و فقط همراه ثبت movement تغییر می‌کند.
+model StockMovement {
+  id        String            @id @default(cuid())
+  productId String
+  product   Product           @relation(fields: [productId], references: [id], onDelete: Restrict)
+  delta     Int
+  type      StockMovementType
+  orderId   String?
+  order     Order?            @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  /// چه کسی (null = سیستم/کرون)
+  userId    String?
+  note      String?
+  createdAt DateTime          @default(now())
+
+  @@index([productId, createdAt])
+  @@index([orderId])
+}
