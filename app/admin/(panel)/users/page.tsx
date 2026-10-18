@@ -4,7 +4,6 @@ import { DataTable, EmptyRow, Td, Th } from "@/components/admin/data-table";
 import { PageHeader } from "@/components/admin/page-header";
 import { SearchForm } from "@/components/admin/search-form";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
 import { requireAdmin } from "@/lib/dal";
@@ -31,11 +30,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
       <PageHeader
         title="کاربران"
         description={`${formatNumber(total)} کاربر`}
-        action={
-          <Link href="/admin/users/new" className={buttonVariants({ size: "sm" })}>
-            کاربر جدید
-          </Link>
-        }
+        action={{ href: "/admin/users/new", label: "کاربر جدید" }}
       />
 
       <SearchForm action="/admin/users" q={q} placeholder="موبایل یا نام…">
