@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { maskPhone } from "@/lib/phone";
 import { rateLimit } from "@/lib/rate-limit";
-import { sms } from "@/lib/sms";
+import { sms } from "@/lib/auth/";
 import { OTP_LENGTH, OTP_MAX_ATTEMPTS, OTP_RESEND_SECONDS, OTP_TTL_SECONDS, type Role } from "./constants";
 
 type Failure = { ok: false; error: string };

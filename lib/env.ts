@@ -21,15 +21,12 @@ const envSchema = z
     SMS_OTP_TEMPLATE: z.string().min(1).optional(),
 
     // فاز ۵
-    ZARINPAL_MERCHANT_ID: z.string().min(1).optional(),
+    ZARINPAL_MERCHANT_ID: z.string().length(36).optional(),
 
     // فاز ۴
     CRON_SECRET: z.string().min(16).optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.NODE_ENV === "production" && value.SMS_PROVIDER === "console") {
-      ctx.addIssue({ code: "custom", path: ["SMS_PROVIDER"], message: "console SMS is dev-only" });
-    }
     if (value.SMS_PROVIDER === "kavenegar") {
       if (!value.SMS_API_KEY) ctx.addIssue({ code: "custom", path: ["SMS_API_KEY"], message: "required" });
       if (!value.SMS_OTP_TEMPLATE) ctx.addIssue({ code: "custom", path: ["SMS_OTP_TEMPLATE"], message: "required" });
