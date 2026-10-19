@@ -18,6 +18,9 @@ export function productJsonLd(product: ProductDetail) {
     sku: product.sku,
     description: product.shortDescription,
     brand: { "@type": "Brand", name: product.brand },
+    ...(product.images.length > 0 && {
+      image: product.images.map((image) => (image.url.startsWith("http") ? image.url : absoluteUrl(image.url))),
+    }),
     ...(product.ratingCount > 0 && {
       aggregateRating: {
         "@type": "AggregateRating",

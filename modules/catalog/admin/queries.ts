@@ -47,7 +47,10 @@ export async function listAdminProducts({ q, status, page }: AdminProductFilters
 }
 
 export async function getAdminProduct(id: string) {
-  const row = await db.product.findUnique({ where: { id } });
+  const row = await db.product.findUnique({
+    where: { id },
+    include: { images: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }], select: { id: true, url: true, alt: true } } },
+  });
   if (!row) return null;
 
   const specs = productSpecsSchema.safeParse(row.specs);

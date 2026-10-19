@@ -1,3 +1,5 @@
+export type ProductImageRef = { url: string; alt: string };
+
 export type ProductSummary = {
   id: string;
   slug: string;
@@ -10,6 +12,8 @@ export type ProductSummary = {
   rating: number;
   ratingCount: number;
   inStock: boolean;
+  /** تصویر اصلی (اولین تصویر)؛ ندارد = placeholder */
+  image?: ProductImageRef;
 };
 
 export type ProductSpec = {
@@ -25,6 +29,7 @@ export type ProductDetail = ProductSummary & {
   shortDescription: string;
   description: string;
   specs: ProductSpec[];
+  images: ProductImageRef[];
 };
 
 export type CategorySummary = {

@@ -17,12 +17,14 @@ export type ProductPage = {
 const productInclude = {
   brand: { select: { name: true } },
   category: { select: { slug: true } },
+  images: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }], select: { url: true, alt: true } },
 } satisfies Prisma.ProductInclude;
 
 type ProductRow = Prisma.ProductGetPayload<{ include: typeof productInclude }>;
 
 function toProductDetail(row: ProductRow): ProductDetail {
   const specs = productSpecsSchema.safeParse(row.specs);
+  const images = row.images.map((image) => ({ url: image.url, alt: image.alt }));
 
   return {
     id: row.id,
@@ -40,6 +42,8 @@ function toProductDetail(row: ProductRow): ProductDetail {
     shortDescription: row.shortDescription,
     description: row.description,
     specs: specs.success ? specs.data : [],
+    images,
+    image: images[0],
   };
 }
 

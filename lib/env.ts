@@ -25,11 +25,19 @@ const envSchema = z
 
     // فاز ۴
     CRON_SECRET: z.string().min(16).optional(),
+
+    // فاز ۶B — ذخیره‌ی تصاویر: local = روی دیسک سرور (VPS)، blob = Vercel Blob (دموی Vercel)
+    STORAGE_DRIVER: z.enum(["local", "blob"]).default("local"),
+    UPLOAD_DIR: z.string().min(1).default("uploads"),
+    BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
   })
   .superRefine((value, ctx) => {
     if (value.SMS_PROVIDER === "kavenegar") {
       if (!value.SMS_API_KEY) ctx.addIssue({ code: "custom", path: ["SMS_API_KEY"], message: "required" });
       if (!value.SMS_OTP_TEMPLATE) ctx.addIssue({ code: "custom", path: ["SMS_OTP_TEMPLATE"], message: "required" });
+    }
+    if (value.STORAGE_DRIVER === "blob" && !value.BLOB_READ_WRITE_TOKEN) {
+      ctx.addIssue({ code: "custom", path: ["BLOB_READ_WRITE_TOKEN"], message: "required" });
     }
   });
 
