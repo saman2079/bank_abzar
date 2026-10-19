@@ -20,6 +20,8 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateStaticParams() {
   const slugs = await listProductSlugs();
+  // با Cache Components، generateStaticParams نباید خالی برگردد (مثلاً وقتی دیتابیس هنوز seed نشده).
+  if (slugs.length === 0) return [{ slug: "_" }];
   return slugs.map((slug) => ({ slug }));
 }
 
