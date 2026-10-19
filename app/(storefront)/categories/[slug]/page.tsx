@@ -13,9 +13,11 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export async function generateStaticParams() {
   const categories = await listCategories();
+  // با Cache Components، generateStaticParams نباید خالی برگردد (مثلاً وقتی دیتابیس هنوز seed نشده).
+  // slug جایگزین هنگام رندر notFound() می‌دهد و فقط یک ۴۰۴ ساخته می‌شود.
+  if (categories.length === 0) return [{ slug: "_" }];
   return categories.map((category) => ({ slug: category.slug }));
 }
-
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
