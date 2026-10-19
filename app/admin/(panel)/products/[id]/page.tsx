@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/admin/page-header";
+import { ProductImagesManager } from "@/components/admin/product-images";
 import { ProductForm } from "@/components/admin/product-form";
+import { Card } from "@/components/ui/card";
 import { requireStaff } from "@/lib/dal";
 import { getAdminProduct, listBrandOptions, listCategoryOptions } from "@/modules/catalog/admin/queries";
 
@@ -28,6 +30,10 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           </Link>
         ) : null}
       </div>
+      <Card className="space-y-3 p-5">
+        <h2 className="font-bold">تصاویر محصول</h2>
+        <ProductImagesManager productId={product.id} images={product.images} />
+      </Card>
       <ProductForm product={product} brands={brands} categories={categories} />
     </div>
   );

@@ -254,5 +254,6 @@ export const mockProducts: ProductDetail[] = seeds.map((seed, index) => {
     ...seed,
     stock,
     inStock: stock > 0,
+    images: [],
   };
 });

@@ -1,15 +1,18 @@
 
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import Link from "next/link";
 import { Field, FormMessage } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
+import { PendingImagesPicker, uploadProductImages } from "@/components/admin/product-images";
 import { createProductAction, updateProductAction } from "@/modules/catalog/admin/actions";
 import { PRODUCT_STATUSES, PRODUCT_STATUS_LABELS } from "@/modules/catalog/admin/constants";
 import type { AdminProduct } from "@/modules/catalog/admin/queries";
+import type { CreateProductState } from "@/modules/catalog/admin/types";
 
 type Option = { id: string; name: string };
 type ProductFormProps = {
@@ -19,10 +22,35 @@ type ProductFormProps = {
 };
 
 export function ProductForm({ product, brands, categories }: ProductFormProps) {
-  const [state, action] = useActionState(
-    product ? updateProductAction : createProductAction,
+  const [files, setFiles] = useState<File[]>([]);
+
+  const [updateState, updateAction] = useActionState(updateProductAction, {});
+  // ساخت محصول: اول محصول ساخته می‌شود، بعد تصاویر انتخاب‌شده به API آپلود می‌شوند (app/api/admin/products/[id]/images).
+  const [createState, createAction] = useActionState(
+    async (
+      previous: CreateProductState,
+      formData: FormData,
+    ): Promise<CreateProductState> => {
+      const result = await createProductAction(previous, formData);
+      if (!result.productId) return result;
+
+      if (files.length > 0) {
+        const uploaded = await uploadProductImages(result.productId, files);
+        if (!uploaded.ok) {
+          return {
+            ...result,
+            error: `محصول ساخته شد ولی آپلود تصاویر ناموفق بود: ${uploaded.error}`,
+          };
+        }
+      }
+      setFiles([]);
+      return result;
+    },
     {},
   );
+
+  const state = product ? updateState : createState;
+  const action = product ? updateAction : createAction;
 
   const values = state.values;
 
@@ -263,11 +291,28 @@ export function ProductForm({ product, brands, categories }: ProductFormProps) {
         />
       </Field>
 
+      {product ? null : (
+        <div className="space-y-2 md:col-span-2">
+          <p className="text-sm font-medium">تصاویر محصول</p>
+          <PendingImagesPicker files={files} onChange={setFiles} />
+        </div>
+      )}
+
       <div className="space-y-3 md:col-span-2">
         <FormMessage
           error={state.error}
-          success={state.ok ? "ذخیره شد." : undefined}
+          success={
+            state.ok ? (product ? "ذخیره شد." : "محصول ساخته شد.") : undefined
+          }
         />
+        {!product && createState.productId ? (
+          <Link
+            href={`/admin/products/${createState.productId}`}
+            className="text-primary text-sm hover:underline"
+          >
+            مشاهده / ویرایش محصول ساخته‌شده
+          </Link>
+        ) : null}
         <SubmitButton pendingLabel="در حال ذخیره…">
           {product ? "ذخیره تغییرات" : "ساخت محصول"}
         </SubmitButton>

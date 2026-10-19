@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Drill, Heart, Star } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { ProductImage } from "@/components/shared/product-image";
 import { Badge } from "@/components/ui/badge";
 import { discountPercent, formatNumber, formatToman } from "@/lib/format";
 import type { ProductSummary } from "@/modules/catalog/types";
@@ -27,9 +28,8 @@ export function ProductCard({ product }: ProductCardProps) {
         ) : null}
       </div>
 
-      {/* جایگزین: <Image> با تصویر واقعی محصول */}
-      <div className="bg-surface-2 text-muted my-2 grid aspect-square place-items-center rounded-xl" aria-hidden>
-        <Drill className="size-14" strokeWidth={1.25} />
+      <div className="bg-surface-2 relative my-2 aspect-square overflow-hidden rounded-xl">
+        <ProductImage image={product.image} sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw" />
       </div>
 
       <p className="text-muted text-start text-xs font-bold tracking-wide" dir="ltr">
