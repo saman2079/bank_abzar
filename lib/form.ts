@@ -4,5 +4,9 @@ export function formString(formData: FormData, key: string): string {
   return typeof value === "string" ? value : "";
 }
 
-/** وضعیت فرم‌های پنل برای `useActionState`. */
-export type ActionState = { ok?: boolean; error?: string };
+/** وضعیت فرم‌های پنل برای useActionState. */
+export type ActionState = {
+  ok?: boolean;
+  error?: string;
+  values?: Record<string, string>;
+};

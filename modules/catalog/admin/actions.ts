@@ -9,7 +9,13 @@ import { db } from "@/lib/db";
 import { isUniqueViolation } from "@/lib/db-errors";
 import { formString, type ActionState } from "@/lib/form";
 import { discountPercent } from "@/lib/format";
-import { brandSchema, categorySchema, entityIdSchema, productCreateSchema, productUpdateSchema } from "./schemas";
+import {
+  brandSchema,
+  categorySchema,
+  entityIdSchema,
+  productCreateSchema,
+  productUpdateSchema,
+} from "./schemas";
 
 function firstIssue(error: { issues: { message: string }[] }): string {
   return error.issues[0]?.message ?? "ورودی نامعتبر است.";
@@ -39,14 +45,22 @@ function productFormData(formData: FormData) {
   };
 }
 
-export async function createProductAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export async function createProductAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   const staff = await requireStaff();
 
-  const parsed = productCreateSchema.safeParse({
+  const values = {
     ...productFormData(formData),
     initialStock: formString(formData, "initialStock"),
-  });
-  if (!parsed.success) return { error: firstIssue(parsed.error) };
+  };
+
+  const parsed = productCreateSchema.safeParse(values);
+
+  if (!parsed.success) {
+    return { error: firstIssue(parsed.error), values };
+  }
 
   const { initialStock, compareAtPrice, ...fields } = parsed.data;
 
@@ -57,7 +71,10 @@ export async function createProductAction(_prev: ActionState, formData: FormData
         data: {
           ...fields,
           compareAtPrice,
-          discountPercent: discountPercent(fields.price, compareAtPrice ?? undefined),
+          discountPercent: discountPercent(
+            fields.price,
+            compareAtPrice ?? undefined,
+          ),
           stock: initialStock,
         },
         select: { id: true },
@@ -65,48 +82,91 @@ export async function createProductAction(_prev: ActionState, formData: FormData
 
       if (initialStock > 0) {
         await tx.stockMovement.create({
-          data: { productId: created.id, delta: initialStock, type: "INITIAL", userId: staff.id, note: "موجودی اولیه" },
+          data: {
+            productId: created.id,
+            delta: initialStock,
+            type: "INITIAL",
+            userId: staff.id,
+            note: "موجودی اولیه",
+          },
         });
       }
+
       await writeAudit(
         {
           actor: staff,
           action: "product.create",
           entity: "product",
           entityId: created.id,
-          diff: { name: fields.name, price: fields.price, status: fields.status, initialStock },
+          diff: {
+            name: fields.name,
+            price: fields.price,
+            status: fields.status,
+            initialStock,
+          },
         },
         tx,
       );
+
       return created.id;
     });
   } catch (error) {
-    if (isUniqueViolation(error)) return { error: "نامک یا کد کالا (SKU) تکراری است." };
+    if (isUniqueViolation(error)) {
+      return {
+        error: "نامک یا کد کالا (SKU) تکراری است.",
+        values,
+      };
+    }
+
     throw error;
   }
 
   invalidateProducts(fields.slug);
-  redirect(`/admin/products/${id}`);
+  redirect("/admin/products/new");
 }
 
-export async function updateProductAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export async function updateProductAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   const staff = await requireStaff();
+  const values = productFormData(formData);
 
   const id = entityIdSchema.safeParse(formString(formData, "id"));
-  if (!id.success) return { error: "محصول نامعتبر است." };
 
-  const parsed = productUpdateSchema.safeParse(productFormData(formData));
-  if (!parsed.success) return { error: firstIssue(parsed.error) };
+  if (!id.success) {
+    return { error: "محصول نامعتبر است.", values };
+  }
 
-  const before = await db.product.findUnique({ where: { id: id.data } });
-  if (!before) return { error: "محصول پیدا نشد." };
+  const parsed = productUpdateSchema.safeParse(values);
+
+  if (!parsed.success) {
+    return { error: firstIssue(parsed.error), values };
+  }
+
+  const before = await db.product.findUnique({
+    where: { id: id.data },
+  });
+
+  if (!before) {
+    return { error: "محصول پیدا نشد.", values };
+  }
 
   const { compareAtPrice, ...fields } = parsed.data;
-  const data = { ...fields, compareAtPrice, discountPercent: discountPercent(fields.price, compareAtPrice ?? undefined) };
+
+  const data = {
+    ...fields,
+    compareAtPrice,
+    discountPercent: discountPercent(fields.price, compareAtPrice ?? undefined),
+  };
 
   try {
     await db.$transaction(async (tx) => {
-      await tx.product.update({ where: { id: before.id }, data });
+      await tx.product.update({
+        where: { id: before.id },
+        data,
+      });
+
       await writeAudit(
         {
           actor: staff,
@@ -119,7 +179,13 @@ export async function updateProductAction(_prev: ActionState, formData: FormData
       );
     });
   } catch (error) {
-    if (isUniqueViolation(error)) return { error: "نامک یا کد کالا (SKU) تکراری است." };
+    if (isUniqueViolation(error)) {
+      return {
+        error: "نامک یا کد کالا (SKU) تکراری است.",
+        values,
+      };
+    }
+
     throw error;
   }
 
@@ -127,7 +193,10 @@ export async function updateProductAction(_prev: ActionState, formData: FormData
   return { ok: true };
 }
 
-export async function saveCategoryAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export async function saveCategoryAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   const staff = await requireStaff();
 
   const parsed = categorySchema.safeParse({
@@ -149,11 +218,13 @@ export async function saveCategoryAction(_prev: ActionState, formData: FormData)
   if (id && data.parentId) {
     let cursor: string | null = data.parentId;
     for (let depth = 0; cursor && depth < 50; depth += 1) {
-      if (cursor === id) return { error: "دسته نمی‌تواند والد خودش یا زیرمجموعه‌اش باشد." };
-      const parent: { parentId: string | null } | null = await db.category.findUnique({
-        where: { id: cursor },
-        select: { parentId: true },
-      });
+      if (cursor === id)
+        return { error: "دسته نمی‌تواند والد خودش یا زیرمجموعه‌اش باشد." };
+      const parent: { parentId: string | null } | null =
+        await db.category.findUnique({
+          where: { id: cursor },
+          select: { parentId: true },
+        });
       cursor = parent?.parentId ?? null;
     }
   }
@@ -166,7 +237,13 @@ export async function saveCategoryAction(_prev: ActionState, formData: FormData)
       await db.$transaction(async (tx) => {
         await tx.category.update({ where: { id }, data });
         await writeAudit(
-          { actor: staff, action: "category.update", entity: "category", entityId: id, diff: diffFields(before, data) },
+          {
+            actor: staff,
+            action: "category.update",
+            entity: "category",
+            entityId: id,
+            diff: diffFields(before, data),
+          },
           tx,
         );
       });
@@ -174,7 +251,13 @@ export async function saveCategoryAction(_prev: ActionState, formData: FormData)
       const created = await db.$transaction(async (tx) => {
         const row = await tx.category.create({ data, select: { id: true } });
         await writeAudit(
-          { actor: staff, action: "category.create", entity: "category", entityId: row.id, diff: { name: data.name } },
+          {
+            actor: staff,
+            action: "category.create",
+            entity: "category",
+            entityId: row.id,
+            diff: { name: data.name },
+          },
           tx,
         );
         return row;
@@ -184,7 +267,8 @@ export async function saveCategoryAction(_prev: ActionState, formData: FormData)
       redirect(`/admin/categories/${created.id}`);
     }
   } catch (error) {
-    if (isUniqueViolation(error)) return { error: "این نامک قبلاً استفاده شده است." };
+    if (isUniqueViolation(error))
+      return { error: "این نامک قبلاً استفاده شده است." };
     throw error;
   }
 
@@ -203,17 +287,28 @@ export async function deleteCategoryAction(formData: FormData): Promise<void> {
     where: { id: id.data, products: { none: {} }, children: { none: {} } },
   });
   if (deleted.count > 0) {
-    await writeAudit({ actor: staff, action: "category.delete", entity: "category", entityId: id.data });
+    await writeAudit({
+      actor: staff,
+      action: "category.delete",
+      entity: "category",
+      entityId: id.data,
+    });
     updateTag(CACHE_TAGS.categories);
     updateTag(CACHE_TAGS.catalog);
   }
   redirect("/admin/categories");
 }
 
-export async function saveBrandAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export async function saveBrandAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   const staff = await requireStaff();
 
-  const parsed = brandSchema.safeParse({ name: formString(formData, "name"), slug: formString(formData, "slug") });
+  const parsed = brandSchema.safeParse({
+    name: formString(formData, "name"),
+    slug: formString(formData, "slug"),
+  });
   if (!parsed.success) return { error: firstIssue(parsed.error) };
 
   const id = formString(formData, "id");
@@ -226,15 +321,30 @@ export async function saveBrandAction(_prev: ActionState, formData: FormData): P
       await db.$transaction(async (tx) => {
         await tx.brand.update({ where: { id }, data: parsed.data });
         await writeAudit(
-          { actor: staff, action: "brand.update", entity: "brand", entityId: id, diff: diffFields(before, parsed.data) },
+          {
+            actor: staff,
+            action: "brand.update",
+            entity: "brand",
+            entityId: id,
+            diff: diffFields(before, parsed.data),
+          },
           tx,
         );
       });
     } else {
       const created = await db.$transaction(async (tx) => {
-        const row = await tx.brand.create({ data: parsed.data, select: { id: true } });
+        const row = await tx.brand.create({
+          data: parsed.data,
+          select: { id: true },
+        });
         await writeAudit(
-          { actor: staff, action: "brand.create", entity: "brand", entityId: row.id, diff: { name: parsed.data.name } },
+          {
+            actor: staff,
+            action: "brand.create",
+            entity: "brand",
+            entityId: row.id,
+            diff: { name: parsed.data.name },
+          },
           tx,
         );
         return row;
@@ -244,7 +354,8 @@ export async function saveBrandAction(_prev: ActionState, formData: FormData): P
       redirect(`/admin/brands/${created.id}`);
     }
   } catch (error) {
-    if (isUniqueViolation(error)) return { error: "نام یا نامک برند تکراری است." };
+    if (isUniqueViolation(error))
+      return { error: "نام یا نامک برند تکراری است." };
     throw error;
   }
 
@@ -258,9 +369,16 @@ export async function deleteBrandAction(formData: FormData): Promise<void> {
   const id = entityIdSchema.safeParse(formString(formData, "id"));
   if (!id.success) return;
 
-  const deleted = await db.brand.deleteMany({ where: { id: id.data, products: { none: {} } } });
+  const deleted = await db.brand.deleteMany({
+    where: { id: id.data, products: { none: {} } },
+  });
   if (deleted.count > 0) {
-    await writeAudit({ actor: staff, action: "brand.delete", entity: "brand", entityId: id.data });
+    await writeAudit({
+      actor: staff,
+      action: "brand.delete",
+      entity: "brand",
+      entityId: id.data,
+    });
     updateTag(CACHE_TAGS.brands);
     updateTag(CACHE_TAGS.catalog);
   }

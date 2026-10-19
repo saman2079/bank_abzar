@@ -1,5 +1,3 @@
-// فاز ۲: کاتالوگ. فاز ۳: کاربر/OTP/سشن/آدرس. فاز ۴: سبد/سفارش/انبار. فاز ۵: پرداخت. فاز ۶: AuditLog (و بعداً Media/Setting). مقاله در فاز ۷.
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -9,17 +7,9 @@ datasource db {
   provider = "postgresql"
 }
 
-enum ProductStatus {
-  DRAFT
-  ACTIVE
-  ARCHIVED
-}
-
 model Category {
   id             String     @id @default(cuid())
   parentId       String?
-  parent         Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
-  children       Category[] @relation("CategoryTree")
   name           String
   slug           String     @unique
   description    String?
@@ -28,9 +18,11 @@ model Category {
   seoDescription String?
   sortOrder      Int        @default(0)
   isActive       Boolean    @default(true)
-  products       Product[]
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+  parent         Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children       Category[] @relation("CategoryTree")
+  products       Product[]
 
   @@index([parentId])
 }
@@ -40,45 +32,45 @@ model Brand {
   name      String    @unique
   slug      String    @unique
   logo      String?
-  products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  products  Product[]
 }
 
 model Product {
-  id               String         @id @default(cuid())
-  sku              String         @unique
-  name             String
-  slug             String         @unique
-  brandId          String
-  brand            Brand          @relation(fields: [brandId], references: [id], onDelete: Restrict)
-  categoryId       String
-  category         Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  shortDescription String
+  id                String          @id @default(cuid())
+  sku               String          @unique
+  name              String
+  slug              String          @unique
+  brandId           String
+  categoryId        String
+  shortDescription  String
   /// HTML پاک‌سازی‌شده (sanitize) — در پنل ادمین قبل از ذخیره پاک می‌شود
-  description      String
+  description       String
   /// قیمت نهایی به تومان
-  price            Int
+  price             Int
   /// قیمت قبل از تخفیف به تومان
-  compareAtPrice   Int?
+  compareAtPrice    Int?
   /// از روی price/compareAtPrice هنگام ذخیره محاسبه می‌شود (برای مرتب‌سازی)
-  discountPercent  Int            @default(0)
+  discountPercent   Int             @default(0)
   /// موجودی انبار. هرگز منفی نمی‌شود: کاهش فقط با UPDATE اتمیک `WHERE stock >= n` (فاز ۴)
-  stock            Int            @default(0)
-  lowStockThreshold Int           @default(3)
-  status           ProductStatus  @default(DRAFT)
+  stock             Int             @default(0)
+  lowStockThreshold Int             @default(3)
+  status            ProductStatus   @default(DRAFT)
   /// آرایه‌ی [{ label, value }]
-  specs            Json           @default("[]")
-  seoTitle         String?
-  seoDescription   String?
-  ratingAvg        Float          @default(0)
-  ratingCount      Int            @default(0)
-  images           ProductImage[]
-  orderItems       OrderItem[]
-  stockMovements   StockMovement[]
-  cartItems        CartItem[]
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  specs             Json            @default("[]")
+  seoTitle          String?
+  seoDescription    String?
+  ratingAvg         Float           @default(0)
+  ratingCount       Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  cartItems         CartItem[]
+  orderItems        OrderItem[]
+  brand             Brand           @relation(fields: [brandId], references: [id])
+  category          Category        @relation(fields: [categoryId], references: [id])
+  images            ProductImage[]
+  stockMovements    StockMovement[]
 
   @@index([categoryId, status])
   @@index([brandId])
@@ -90,39 +82,33 @@ model Product {
 model ProductImage {
   id        String  @id @default(cuid())
   productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   url       String
   alt       String
   sortOrder Int     @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
 }
 
-enum Role {
-  CUSTOMER
-  STAFF
-  ADMIN
-}
-
 model User {
-  id              String    @id @default(cuid())
+  id              String     @id @default(cuid())
   /// قالب استاندارد 09xxxxxxxxx (lib/phone.ts)
-  phone           String    @unique
+  phone           String     @unique
   name            String?
   email           String?
-  role            Role      @default(CUSTOMER)
+  role            Role       @default(CUSTOMER)
   /// فقط ادمین/استاف (Argon2id). مشتری فقط با OTP وارد می‌شود.
   passwordHash    String?
   phoneVerifiedAt DateTime?
   /// کاربری که ادمین تلفنی ساخته؛ تا اولین ورود با OTP تأیید نشده است
-  createdByAdmin  Boolean   @default(false)
-  isActive        Boolean   @default(true)
-  sessions        Session[]
+  createdByAdmin  Boolean    @default(false)
+  isActive        Boolean    @default(true)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
   addresses       Address[]
-  orders          Order[]
   cartItems       CartItem[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  orders          Order[]
+  sessions        Session[]
 
   @@index([role])
 }
@@ -145,13 +131,13 @@ model OtpCode {
 model Session {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// SHA-256 توکن کوکی؛ خود توکن ذخیره نمی‌شود
   tokenHash String   @unique
   expiresAt DateTime
   userAgent String?
   ip        String?
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
@@ -160,7 +146,6 @@ model Session {
 model Address {
   id            String   @id @default(cuid())
   userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   receiverName  String
   receiverPhone String
   province      String
@@ -172,6 +157,7 @@ model Address {
   isDefault     Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -189,24 +175,14 @@ model RateLimit {
 model CartItem {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
-}
-
-enum OrderStatus {
-  PENDING_PAYMENT
-  PAID
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELED
-  RETURNED
 }
 
 model Order {
@@ -214,7 +190,6 @@ model Order {
   /// شماره‌ی ترتیبی؛ برای نمایش با `formatOrderNumber` (۱۰۰۰ + number)
   number          Int                  @unique @default(autoincrement())
   userId          String
-  user            User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
   status          OrderStatus          @default(PENDING_PAYMENT)
   /// همه‌ی مبالغ به تومان
   subtotal        Int
@@ -228,12 +203,13 @@ model Order {
   expiresAt       DateTime?
   /// چه کسی ثبت کرده: خود مشتری یا ادمین (سفارش تلفنی)
   createdById     String?
-  items           OrderItem[]
-  history         OrderStatusHistory[]
-  movements       StockMovement[]
-  payments        Payment[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
+  user            User                 @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  history         OrderStatusHistory[]
+  payments        Payment[]
+  movements       StockMovement[]
 
   @@index([userId, createdAt])
   @@index([status, expiresAt])
@@ -242,13 +218,13 @@ model Order {
 model OrderItem {
   id           String  @id @default(cuid())
   orderId      String
-  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId    String
-  product      Product @relation(fields: [productId], references: [id], onDelete: Restrict)
   nameSnapshot String
   skuSnapshot  String
   unitPrice    Int
   quantity     Int
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
   @@index([productId])
@@ -257,54 +233,37 @@ model OrderItem {
 model OrderStatusHistory {
   id          String       @id @default(cuid())
   orderId     String
-  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
   from        OrderStatus?
   to          OrderStatus
   changedById String?
   note        String?
   createdAt   DateTime     @default(now())
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId, createdAt])
-}
-
-enum StockMovementType {
-  SALE
-  ORDER_CANCEL
-  MANUAL_IN
-  MANUAL_OUT
-  ADJUSTMENT
-  RETURN
-  INITIAL
 }
 
 /// دفتر کل موجودی (منبع حقیقت). `Product.stock` کش مجموع delta هاست و فقط همراه ثبت movement تغییر می‌کند.
 model StockMovement {
   id        String            @id @default(cuid())
   productId String
-  product   Product           @relation(fields: [productId], references: [id], onDelete: Restrict)
   delta     Int
   type      StockMovementType
   orderId   String?
-  order     Order?            @relation(fields: [orderId], references: [id], onDelete: SetNull)
   /// چه کسی (null = سیستم/کرون)
   userId    String?
   note      String?
   createdAt DateTime          @default(now())
+  order     Order?            @relation(fields: [orderId], references: [id])
+  product   Product           @relation(fields: [productId], references: [id])
 
   @@index([productId, createdAt])
   @@index([orderId])
 }
 
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-}
-
 model Payment {
   id          String        @id @default(cuid())
   orderId     String
-  order       Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
   gateway     String
   /// شناسه‌ی تراکنش درگاه؛ یکتا — کلید idempotency callback
   authority   String        @unique
@@ -321,6 +280,7 @@ model Payment {
   rawResponse Json?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  order       Order         @relation(fields: [orderId], references: [id])
 
   @@index([orderId])
   @@index([status, createdAt])
@@ -342,4 +302,42 @@ model AuditLog {
 
   @@index([createdAt])
   @@index([entity, entityId])
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELED
+  RETURNED
+}
+
+enum StockMovementType {
+  SALE
+  ORDER_CANCEL
+  MANUAL_IN
+  MANUAL_OUT
+  ADJUSTMENT
+  RETURN
+  INITIAL
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
 }
