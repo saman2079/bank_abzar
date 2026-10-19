@@ -16,6 +16,7 @@ import {
   productCreateSchema,
   productUpdateSchema,
 } from "./schemas";
+import type { CreateProductState } from "./types";
 
 function firstIssue(error: { issues: { message: string }[] }): string {
   return error.issues[0]?.message ?? "ورودی نامعتبر است.";
@@ -46,9 +47,9 @@ function productFormData(formData: FormData) {
 }
 
 export async function createProductAction(
-  _prev: ActionState,
+  _prev: CreateProductState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<CreateProductState> {
   const staff = await requireStaff();
 
   const values = {
@@ -122,7 +123,8 @@ export async function createProductAction(
   }
 
   invalidateProducts(fields.slug);
-  redirect("/admin/products/new");
+  // بعد از ساخت، فرم (سمت کلاینت) تصاویر انتخاب‌شده را آپلود می‌کند و برای محصول بعدی خالی می‌شود.
+  return { ok: true, productId: id };
 }
 
 export async function updateProductAction(

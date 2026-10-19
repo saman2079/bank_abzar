@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Drill, ShieldCheck, Truck } from "lucide-react";
+import { ShieldCheck, Truck } from "lucide-react";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { JsonLd } from "@/components/shared/json-ld";
 import { ProductGrid } from "@/components/shared/product-grid";
+import { ProductImage } from "@/components/shared/product-image";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { discountPercent, formatNumber, formatToman } from "@/lib/format";
@@ -74,9 +75,20 @@ export default async function ProductPage({ params }: { params: Params }) {
       <Breadcrumbs items={crumbs} />
 
       <div className="grid gap-8 md:grid-cols-2">
-        {/* جایگزین: گالری <Image> با alt توصیفی */}
-        <Card className="text-muted grid aspect-square place-items-center">
-          <Drill className="size-32" strokeWidth={1} aria-hidden />
+        <Card className="overflow-hidden">
+          {product.images.length > 0 ? (
+            <ul className="flex snap-x snap-mandatory overflow-x-auto">
+              {product.images.map((image, index) => (
+                <li key={image.url} className="relative aspect-square w-full shrink-0 snap-center">
+                  <ProductImage image={image} sizes="(min-width: 768px) 50vw, 100vw" priority={index === 0} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="relative aspect-square">
+              <ProductImage />
+            </div>
+          )}
         </Card>
 
         <div>
