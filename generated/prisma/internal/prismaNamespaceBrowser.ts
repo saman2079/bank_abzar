@@ -66,7 +66,8 @@ export const ModelName = {
   OrderStatusHistory: 'OrderStatusHistory',
   StockMovement: 'StockMovement',
   Payment: 'Payment',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  Setting: 'Setting'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -329,6 +330,16 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const SettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById'
+} as const
+
+export type SettingScalarFieldEnum = (typeof SettingScalarFieldEnum)[keyof typeof SettingScalarFieldEnum]
 
 
 export const SortOrder = {

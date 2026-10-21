@@ -3,7 +3,7 @@
 
 ## وضعیت فعلی (برای چت جدید — اول این بخش را بخوان)
 
-**شیوه کار:** روی ریپوی کاربر کامیت/پوش نکن. فایل‌های کامل و آماده‌ی کپی‌پیست بده (کوتاه، بدون توضیح اضافه)، و بعد از هر تحویل کد همین چک‌لیست را آپدیت کن.
+**شیوه کار:** پیش‌فرض: روی ریپوی کاربر کامیت/پوش نکن، مگر کاربر صریحاً بخواهد (بخش تصاویر به درخواست او روی `main` پوش شد). هر کد را با مسیر و «برای کدام بخش» توضیح بده. فایل‌های کامل و آماده‌ی کپی‌پیست بده (کوتاه، بدون توضیح اضافه)، و بعد از هر تحویل کد همین چک‌لیست را آپدیت کن.
 
 **تحویل‌شده ولی هنوز تأیید نشده:** کد فاز ۰ تا ۵ تحویل شده، اما `lint`/`typecheck`/`build` هیچ‌وقت اجرا نشده (محیط Claude به npm دسترسی ندارد). اولین کار: خروجی `npm run lint && npm run typecheck && npm run build` را از کاربر بگیر، خطاها را رفع کن، سپس موارد تأییدشده را تیک بزن.
 
@@ -19,9 +19,14 @@
 
 **پنل ادمین (فاز ۶A):** مدل `AuditLog` (migration جدید `admin`). `lib/{audit,date,db-errors,query-params}.ts`، `modules/{catalog/admin,inventory,orders/admin,users/admin,dashboard,audit}`، `components/admin/*`، صفحات `/admin/{,products,categories,brands,inventory,orders,users,audit}`. دسترسی: STAFF = محصول/دسته/برند/انبار/سفارش؛ ADMIN = + کاربران و گزارش تغییرات (`requireAdmin`). محصول حذف نمی‌شود، فقط `ARCHIVED`. توضیح محصول فعلاً متن ساده است؛ مشخصات در textarea به‌صورت خطوط «عنوان: مقدار». تغییر قیمت/موجودی/وضعیت سفارش/کاربر در یک تراکنش با AuditLog ثبت می‌شود (رمز هرگز لاگ نمی‌شود). گذار وضعیت سفارش: `modules/orders/admin/transitions.ts`؛ پرداخت دستی/لغو/مرجوع دلیل اجباری دارد؛ لغو سفارش پرداخت‌شده موجودی را برمی‌گرداند ولی بازگشت وجه دستی از پنل زرین‌پال است. تأییدنشده: هیچ‌کدام از فایل‌های فاز ۳–۶ هنوز lint/typecheck/build نشده‌اند؛ `@node-rs/argon2` شاید نیاز به `serverExternalPackages` داشته باشد. مانده در ۶B: ثبت سفارش دستی، رسانه/تصاویر محصول، تنظیمات (انتقال `SHIPPING` به Setting).
 
+**فاز ۶B (تصاویر، سفارش دستی، تنظیمات):** ⚠️ ریپوی `master` منبع حقیقت است (کاربر typecheck را اجرا و خطاها را آنجا رفع کرده)؛ اول `master` را clone و با کار خودت تطبیق بده، نه با نسخه‌ی قدیمی. شاخه‌ی `main` (ساخته‌شده از master، یک کامیت `feat(media)`) فقط **بخش تصاویر** را دارد (به درخواست کاربر پوش شد)؛ بقیه‌ی فاز ۶B به‌صورت زیپ تحویل می‌شود. نقشه‌ی دقیق فایل‌ها: `docs/STRUCTURE.md`.
+- **تصاویر:** `lib/storage/{types,local,blob,index}.ts` (درایور `STORAGE_DRIVER=local|blob`؛ local = دیسک `UPLOAD_DIR`، blob = Vercel Blob برای Vercel چون دیسکش فقط‌خواندنی است)، `modules/media/{constants,process,service,actions}.ts` (sharp: نوع از محتوا، حداکثر ۴۰ مگاپیکسل، ۸MB، ۱۰ تصویر/محصول، خروجی WebP حداکثر ۱۶۰۰px بدون EXIF)، `app/api/admin/products/[id]/images/route.ts` (POST multipart؛ staff، Origin، rate-limit ۳۰/دقیقه)، `app/uploads/[...path]/route.ts`، `components/admin/product-images.tsx`، `components/shared/product-image.tsx`. در «محصول جدید» تصاویر انتخاب می‌شوند و بعد از ساخت محصول آپلود می‌شوند؛ در «ویرایش» مدیریت کامل. فروشگاه: کارت و گالری محصول (اسکرول-اسنپ) + `image` در JSON-LD. تغییر schema ندارد. **لازم:** `npm i sharp @vercel/blob`، خط `/uploads` در `.gitignore`، و در `next.config.ts`: `images: { remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }] }` (فقط برای blob). روی Vercel: `STORAGE_DRIVER=blob` + `BLOB_READ_WRITE_TOKEN` (Vercel محدودیت بدنه‌ی ۴.۵MB دارد → هر بار آپلود کم‌حجم).
+- **تنظیمات:** مدل `Setting` (migration جدید `settings`)، `modules/settings/*`، `/admin/settings` (فقط ADMIN)، `calcShipping(subtotal, settings)`؛ `SHIPPING` ثابت حذف شد و `CartSummary` اکنون async است. مقدار پیش‌فرض ۸۰ هزار / رایگان بالای ۵ میلیون تا صاحب فروشگاه تعیین کند.
+- **سفارش دستی:** `modules/orders/admin/manual-service.ts` (همان کسر اتمیک `placeOrder`؛ مشتری با موبایل پیدا/ساخته می‌شود `createdByAdmin`؛ پرداخت‌شده → PAID با توضیح اجباری، یا PENDING با مهلت ۳۰ دقیقه)، `/admin/orders/new`. تأییدنشده: هیچ‌کدام از کدهای ۶B اجرا/typecheck نشده‌اند.
+
 **قانون cacheComponents:** `searchParams` فقط داخل `<Suspense>` خوانده شود (`ProductListing`). `params` صفحه‌ی محصول/دسته بیرون Suspense و همراه `generateStaticParams` خوانده می‌شود تا slug ناموجود ۴۰۴ واقعی بدهد؛ سازگاری این الگو با Next 16.4 هنوز تأیید نشده و اگر build خطای blocking-route داد باید اصلاح شود.
 
-**نکته‌های باز:** `app/not-found.tsx` بدون هدر/فوتر است (۴۰۴ داخل storefront هم از همین می‌آید)؛ تصاویر محصول/هیرو placeholder هستند؛ دکمه‌های سبد و علاقه‌مندی فقط ظاهری‌اند تا فاز ۴؛ `Product` JSON-LD هنوز `image` ندارد. لینک «علاقه‌مندی» (`/account/wishlist`) هنوز صفحه ندارد. تأییدنشده‌ها در فاز ۳: آداپتر کاوه‌نگار با پنل واقعی؛ اینکه `@node-rs/argon2` خودکار external می‌شود (اگر build شکایت کرد `serverExternalPackages: ["@node-rs/argon2"]` را به `next.config.ts` اضافه کن)؛ رفتار `redirect()` داخل Suspense در لی‌اوت‌های account/admin. فقط توابع خالص (`phone.ts`, `redirect.ts`) واقعاً اجرا و تست شده‌اند.
+**نکته‌های باز:** `app/not-found.tsx` بدون هدر/فوتر است (۴۰۴ داخل storefront هم از همین می‌آید)؛ تصاویر هیرو/بنرها هنوز placeholder هستند (تصاویر محصول واقعی شد)؛ دکمه‌های سبد و علاقه‌مندی فقط ظاهری‌اند تا فاز ۴؛ لینک «علاقه‌مندی» (`/account/wishlist`) هنوز صفحه ندارد. تأییدنشده‌ها در فاز ۳: آداپتر کاوه‌نگار با پنل واقعی؛ اینکه `@node-rs/argon2` خودکار external می‌شود (اگر build شکایت کرد `serverExternalPackages: ["@node-rs/argon2"]` را به `next.config.ts` اضافه کن)؛ رفتار `redirect()` داخل Suspense در لی‌اوت‌های account/admin. فقط توابع خالص (`phone.ts`, `redirect.ts`) واقعاً اجرا و تست شده‌اند.
 
 ## فاز ۰ — آماده‌سازی ریپو
 - [ ] کپی `CLAUDE.md` در ریشه و `ARCHITECTURE.md` + `CHECKLIST.md` در `docs/`
@@ -76,15 +81,15 @@
 
 ## فاز ۶ — پنل ادمین
 - [x] لی‌اوت ادمین + داشبورد (فروش، کمبود موجودی، سفارش‌های جدید، نیازمند بازگشت وجه)
-- [x] CRUD محصول (مشخصات، SEO، وضعیت) — مانده: تصاویر (فاز ۶B)
+- [x] CRUD محصول (مشخصات، SEO، وضعیت، **تصاویر**: چندتایی، alt، ترتیب، حذف)
 - [x] CRUD دسته‌بندی (درختی) و برند
 - [x] انبار: لیست موجودی، افزایش/کاهش دستی با دلیل، تاریخچه
 - [x] سفارش‌ها: لیست/فیلتر/جزئیات/تغییر وضعیت + History
-- [ ] ثبت سفارش دستی برای مشتری تلفنی
+- [x] ثبت سفارش دستی برای مشتری تلفنی (`/admin/orders/new`)
 - [x] کاربران: لیست، ساخت کاربر تلفنی/کارمند، ویرایش، غیرفعال‌سازی، تغییر رمز
-- [ ] مدیریت رسانه (آپلود، alt، sharp→WebP)
+- [x] مدیریت رسانه‌ی محصول (آپلود، alt، sharp→WebP) — کتابخانه‌ی رسانه‌ی عمومی برای مقاله در فاز ۷
 - [x] AuditLog + صفحه نمایش (فقط ادمین)
-- [ ] تنظیمات (هزینه ارسال، تماس، …)
+- [x] تنظیمات: هزینه ارسال (`/admin/settings`) — اطلاعات تماس بعداً
 
 ## فاز ۷ — مقاله و سئو
 - [ ] مدل و CRUD مقاله + پیش‌نویس/انتشار

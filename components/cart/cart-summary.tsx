@@ -1,9 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { formatToman } from "@/lib/format";
 import { calcShipping } from "@/modules/orders/constants";
+import { getShippingSettings } from "@/modules/settings/queries";
 
-export function CartSummary({ subtotal, children }: { subtotal: number; children?: React.ReactNode }) {
-  const shipping = calcShipping(subtotal);
+/** هزینه‌ی ارسال از تنظیمات ادمین (کش‌شده) خوانده می‌شود؛ مبلغ نهایی واقعی هنگام ثبت سفارش سمت سرور محاسبه می‌شود. */
+export async function CartSummary({ subtotal, children }: { subtotal: number; children?: React.ReactNode }) {
+  const shipping = calcShipping(subtotal, await getShippingSettings());
 
   return (
     <Card className="space-y-3 p-5">

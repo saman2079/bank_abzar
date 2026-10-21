@@ -15,7 +15,7 @@ function isAuthorized(request: Request, secret: string): boolean {
  * کرون سرور (هر ۵ دقیقه):
  *   curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://DOMAIN/api/internal/cron
  */
-export async function POST(request: Request) {
+async function run(request: Request) {
   if (!env.CRON_SECRET) return Response.json({ error: "cron is not configured" }, { status: 503 });
   if (!isAuthorized(request, env.CRON_SECRET)) return Response.json({ error: "unauthorized" }, { status: 401 });
 
@@ -26,3 +26,7 @@ export async function POST(request: Request) {
 
   return Response.json({ reconciledPayments, expiredOrders, cleaned });
 }
+
+export const POST = run;
+/** Vercel Cron فقط GET می‌زند (و خودش `Authorization: Bearer $CRON_SECRET` می‌فرستد). */
+export const GET = run;

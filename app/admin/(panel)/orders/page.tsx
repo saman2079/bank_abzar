@@ -27,7 +27,11 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
 
   return (
     <div className="space-y-5">
-      <PageHeader title="سفارش‌ها" description={`${formatNumber(total)} سفارش`} />
+      <PageHeader
+        title="سفارش‌ها"
+        description={`${formatNumber(total)} سفارش`}
+        action={{ href: "/admin/orders/new", label: "ثبت سفارش دستی" }}
+      />
 
       <SearchForm action="/admin/orders" q={q} placeholder="شماره سفارش، موبایل یا نام مشتری…">
         <div className="w-48">

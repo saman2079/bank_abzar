@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Boxes, ClipboardList, LayoutDashboard, Package, ScrollText, Tags, Users, Warehouse } from "lucide-react";
+import { Boxes, ClipboardList, LayoutDashboard, Package, ScrollText, Settings, Tags, Users, Warehouse } from "lucide-react";
 import type { Role } from "@/modules/auth/constants";
 
 const items = [
@@ -11,6 +11,7 @@ const items = [
   { href: "/admin/inventory", label: "انبار", Icon: Warehouse, adminOnly: false },
   { href: "/admin/users", label: "کاربران", Icon: Users, adminOnly: true },
   { href: "/admin/audit", label: "گزارش تغییرات", Icon: ScrollText, adminOnly: true },
+  { href: "/admin/settings", label: "تنظیمات", Icon: Settings, adminOnly: true },
 ] as const;
 
 export function AdminNav({ role }: { role: Role }) {

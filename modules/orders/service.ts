@@ -1,6 +1,7 @@
 import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import { getShippingSettings } from "@/modules/settings/queries";
 import { ORDER_EXPIRY_MINUTES, calcShipping } from "./constants";
 
 /** خطای قابل‌نمایش به کاربر؛ داخل تراکنش پرتاب می‌شود تا همه‌چیز rollback شود. */
@@ -19,6 +20,7 @@ export async function placeOrder(
   input: { addressId: string; note: string | null },
 ): Promise<PlaceOrderResult> {
   try {
+    const shippingSettings = await getShippingSettings();
     const orderId = await db.$transaction(async (tx) => {
       const address = await tx.address.findFirst({ where: { id: input.addressId, userId } });
       if (!address) throw new OrderError("آدرس انتخاب‌شده معتبر نیست.");
@@ -46,7 +48,7 @@ export async function placeOrder(
         subtotal += product.price * item.quantity;
       }
 
-      const shippingCost = calcShipping(subtotal);
+      const shippingCost = calcShipping(subtotal, shippingSettings);
       const snapshot: Prisma.InputJsonObject = {
         receiverName: address.receiverName,
         receiverPhone: address.receiverPhone,

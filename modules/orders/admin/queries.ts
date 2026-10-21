@@ -80,3 +80,13 @@ export async function getAdminOrder(id: string) {
     })),
   };
 }
+
+/** کالاهای قابل‌فروش برای فرم سفارش دستی (فعال و دارای موجودی). */
+export async function listOrderableProducts() {
+  return db.product.findMany({
+    where: { status: "ACTIVE", stock: { gt: 0 } },
+    orderBy: { name: "asc" },
+    take: 500,
+    select: { id: true, name: true, sku: true, price: true, stock: true },
+  });
+}

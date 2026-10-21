@@ -341,3 +341,11 @@ enum PaymentStatus {
   PAID
   FAILED
 }
+
+/// تنظیمات فروشگاه (کلید → JSON). فعلاً: `shipping` (هزینه ارسال). فقط ادمین تغییر می‌دهد.
+model Setting {
+  key         String   @id
+  value       Json
+  updatedAt   DateTime @updatedAt
+  updatedById String?
+}

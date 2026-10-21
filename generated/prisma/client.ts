@@ -121,3 +121,8 @@ export type Payment = Prisma.PaymentModel
  * ثبت تغییرات حساسِ پنل (قیمت، موجودی، وضعیت سفارش، کاربران). فقط append؛ هرگز ویرایش/حذف نمی‌شود.
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model Setting
+ * تنظیمات فروشگاه (کلید → JSON). فعلاً: `shipping` (هزینه ارسال). فقط ادمین تغییر می‌دهد.
+ */
+export type Setting = Prisma.SettingModel
