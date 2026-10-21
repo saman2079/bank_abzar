@@ -70,6 +70,7 @@ model Product {
   brand             Brand           @relation(fields: [brandId], references: [id])
   category          Category        @relation(fields: [categoryId], references: [id])
   images            ProductImage[]
+  invoiceItems      InvoiceItem[]
   stockMovements    StockMovement[]
 
   @@index([categoryId, status])
@@ -250,15 +251,19 @@ model StockMovement {
   delta     Int
   type      StockMovementType
   orderId   String?
+  /// فاکتور قطعی/ابطال فاکتور که این حرکت را ساخته (null = سفارش یا تغییر دستی)
+  invoiceId String?
   /// چه کسی (null = سیستم/کرون)
   userId    String?
   note      String?
   createdAt DateTime          @default(now())
   order     Order?            @relation(fields: [orderId], references: [id])
+  invoice   Invoice?          @relation(fields: [invoiceId], references: [id])
   product   Product           @relation(fields: [productId], references: [id])
 
   @@index([productId, createdAt])
   @@index([orderId])
+  @@index([invoiceId])
 }
 
 model Payment {
@@ -348,4 +353,67 @@ model Setting {
   value       Json
   updatedAt   DateTime @updatedAt
   updatedById String?
+}
+
+/// پیش‌فاکتور (بدون اثر روی انبار) → فاکتور قطعی (کسر اتمیک موجودی) یا باطل. مستقل از Order فروشگاه آنلاین.
+model Invoice {
+  id              String          @id @default(cuid())
+  /// شماره‌ی ترتیبی؛ با تبدیل پیش‌فاکتور به فاکتور همان شماره می‌ماند. نمایش با `formatInvoiceNumber`
+  number          Int             @unique @default(autoincrement())
+  status          InvoiceStatus   @default(PROFORMA)
+  /// مشتری به‌صورت snapshot (مشتری لزوماً کاربر سایت نیست)
+  customerName    String
+  customerPhone   String?
+  customerAddress String?
+  /// همه‌ی مبالغ به تومان. subtotal = جمع ردیف‌ها بعد از تخفیف ردیف
+  subtotal        Int
+  /// تخفیف کل فاکتور (علاوه بر تخفیف ردیف‌ها)
+  discount        Int             @default(0)
+  /// درصد مالیات بر ارزش افزوده؛ ۰ = بدون مالیات
+  taxPercent      Int             @default(0)
+  taxAmount       Int             @default(0)
+  shippingCost    Int             @default(0)
+  total           Int
+  note            String?
+  /// روش/توضیح پرداخت (مثلاً «کارت‌به‌کارت»)؛ فقط برای فاکتور قطعی
+  paymentNote     String?
+  /// اعتبار پیش‌فاکتور؛ null = بدون محدودیت
+  validUntil      DateTime?
+  createdById     String?
+  finalizedAt     DateTime?
+  finalizedById   String?
+  canceledAt      DateTime?
+  canceledById    String?
+  cancelReason    String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  items           InvoiceItem[]
+  movements       StockMovement[]
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+model InvoiceItem {
+  id           String  @id @default(cuid())
+  invoiceId    String
+  productId    String
+  nameSnapshot String
+  skuSnapshot  String
+  /// قیمت واحد توافق‌شده (تومان)؛ می‌تواند با قیمت فعلی محصول فرق کند
+  unitPrice    Int
+  quantity     Int
+  /// تخفیف همین ردیف (تومان، کل ردیف)
+  discount     Int     @default(0)
+  invoice      Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product      Product @relation(fields: [productId], references: [id])
+
+  @@index([invoiceId])
+  @@index([productId])
+}
+
+enum InvoiceStatus {
+  PROFORMA
+  FINAL
+  CANCELED
 }

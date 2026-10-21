@@ -39,3 +39,17 @@
     color: var(--color-primary-fg);
   }
 }
+
+/* چاپ فاکتور: کاغذ A4، پس‌زمینه‌ی سفید؛ منو و نوار ابزار با `print:hidden` پنهان می‌شوند. */
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+}

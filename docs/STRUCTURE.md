@@ -18,7 +18,7 @@
 |---|---|
 | `(storefront)/` | سایت مشتری: `page.tsx` هوم، `products`، `categories`، `cart`، `checkout`، `login`، `about/contact/rules`، `account/` (پروفایل، آدرس‌ها، سفارش‌ها) |
 | `admin/login` | ورود ادمین/کارمند (رمز) |
-| `admin/(panel)/` | پنل (گیت `requireStaff`): `page.tsx` داشبورد، `products`، `categories`، `brands`، `inventory`، `orders` (+`new` سفارش دستی، `[id]`)، `users` (ADMIN)، `audit` (ADMIN)، `settings` (ADMIN) |
+| `admin/(panel)/` | پنل (گیت `requireStaff`): `page.tsx` داشبورد، `products`، `categories`، `brands`، `inventory`، `orders` (+`new` سفارش دستی، `[id]`)، `invoices` (+`new`، `[id]` سند/چاپ، `[id]/edit`)، `users` (ADMIN)، `audit` (ADMIN)، `settings` (ADMIN) |
 | `api/payments/zarinpal/callback` | بازگشت درگاه → verify → PAID |
 | `api/internal/cron` | کرون (GET/POST با `Bearer CRON_SECRET`): انقضای سفارش، بازبینی پرداخت، پاک‌سازی |
 | `api/admin/products/[id]/images` | آپلود چندفایلی تصویر محصول (staff) |
@@ -33,6 +33,7 @@
 | `cart/` | سبد مهمان (کوکی) + کاربر (DB) + merge |
 | `orders/` | `placeOrder` (تراکنش اتمیک)، لغو/انقضا؛ `admin/` = تغییر وضعیت، لیست/جزئیات، **ثبت سفارش دستی** (`manual-service.ts`) |
 | `payments/` | شروع پرداخت، settle، reconcile |
+| `invoices/` | **فاکتور/پیش‌فاکتور فروش خارج از سایت**: `constants` (وضعیت‌ها، `calcInvoiceTotals`، `INVOICE_SELLER`)، `schemas`، `service` (ذخیره/ویرایش پیش‌فاکتور، قطعی‌کردن با کسر اتمیک انبار، ابطال با برگشت موجودی)، `queries`، `actions` |
 | `inventory/` | تغییر دستی موجودی + دفتر `StockMovement` |
 | `media/` | پردازش sharp→WebP، افزودن/حذف/جابه‌جایی/alt تصاویر محصول |
 | `settings/` | تنظیمات فروشگاه (فعلاً هزینه‌ی ارسال) |
@@ -42,4 +43,4 @@
 `db` (Prisma)، `session`/`dal` (سشن و `requireUser/Staff/Admin`)، `rate-limit` (Postgres)، `audit`، `cache` (تگ‌ها)، `sms/` (console/kavenegar)، `payments/` (اینترفیس + زرین‌پال)، `storage/` (درایور `local` و `blob` برای تصاویر)، `seo`، `format`، `phone`، `date`، `form`، `query-params`، `db-errors`، `maintenance`، `request`.
 
 ## `components/`
-`ui/` پایه · `layout/` هدر/فوتر/ناوبری · `home/` هوم · `catalog/` لیست · `shared/` (کارت محصول، `product-image`، JSON-LD، breadcrumb) · `auth/` · `account/` · `cart/` · `orders/` · `admin/` (فرم‌ها و جدول‌های پنل؛ `product-images`، `manual-order-form`، `shipping-settings-form`، …).
+`ui/` پایه · `layout/` هدر/فوتر/ناوبری · `home/` هوم · `catalog/` لیست · `shared/` (کارت محصول، `product-image`، JSON-LD، breadcrumb) · `auth/` · `account/` · `cart/` · `orders/` · `invoices/` (سند چاپی A4 + نشان وضعیت + دکمه‌ی چاپ) · `admin/` (فرم‌ها و جدول‌های پنل؛ `product-images`، `manual-order-form`، `shipping-settings-form`، …).

@@ -7,16 +7,16 @@ async function PanelShell({ children }: { children: React.ReactNode }) {
   const user = await requireStaff();
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4">
-      <header className="border-border flex items-center justify-between border-b pb-4">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 print:max-w-none print:space-y-0 print:p-0">
+      <header className="border-border flex items-center justify-between border-b pb-4 print:hidden">
         <p className="font-extrabold">پنل مدیریت بانک ابزار</p>
         <div className="flex items-center gap-3 text-sm">
           <span className="text-muted">{user.name ?? user.phone}</span>
           <LogoutButton />
         </div>
       </header>
-      <div className="grid gap-6 md:grid-cols-[200px_1fr]">
-        <aside>
+      <div className="grid gap-6 md:grid-cols-[200px_1fr] print:block">
+        <aside className="print:hidden">
           <AdminNav role={user.role} />
         </aside>
         <div className="min-w-0 space-y-6">{children}</div>

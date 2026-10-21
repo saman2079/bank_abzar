@@ -34,6 +34,7 @@ export async function listStockMovements(productId: string, limit = 50) {
       createdAt: true,
       userId: true,
       order: { select: { id: true, number: true } },
+      invoice: { select: { id: true, number: true } },
     },
   });
 

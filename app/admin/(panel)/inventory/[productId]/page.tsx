@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { requireStaff } from "@/lib/dal";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import { STOCK_MOVEMENT_LABELS } from "@/modules/inventory/constants";
+import { formatInvoiceNumber } from "@/modules/invoices/constants";
 import { getInventoryProduct, listStockMovements } from "@/modules/inventory/queries";
 import { formatOrderNumber } from "@/modules/orders/constants";
 
@@ -67,6 +68,10 @@ export default async function InventoryProductPage({ params }: { params: Promise
                     {movement.order ? (
                       <Link href={`/admin/orders/${movement.order.id}`} className="text-primary hover:underline">
                         سفارش {formatNumber(Number(formatOrderNumber(movement.order.number)))}
+                      </Link>
+                    ) : movement.invoice ? (
+                      <Link href={`/admin/invoices/${movement.invoice.id}`} className="text-primary hover:underline">
+                        فاکتور {formatNumber(Number(formatInvoiceNumber(movement.invoice.number)))}
                       </Link>
                     ) : (
                       (movement.note ?? "—")
