@@ -1,5 +1,5 @@
 # نقشه‌ی ساختار پروژه — هر فایل برای کدام بخش است
-> منبع حقیقت: ریپوی `saman2079/bank_abzar` (شاخه‌ی `master`؛ تصاویر در `main`). قانون: `app/` نازک؛ منطق در `modules/`؛ `lib/` ابزار مشترک.
+> منبع حقیقت: ریپوی `saman2079/bank_abzar` (شاخه‌ی `master`). قانون: `app/` نازک؛ منطق در `modules/`؛ `lib/` ابزار مشترک.
 > جریان: صفحه/اکشن → `modules/<دامنه>/(queries|actions)` → `service` → Prisma. هر Action: `requireStaff|requireAdmin|requireUser → Zod → service → updateTag`.
 
 ## ریشه
@@ -9,7 +9,7 @@
 | `prisma/migrations/` | migrationها — کامیت شود؛ سرور با `prisma migrate deploy` |
 | `prisma/seed.ts` · `create-admin.ts` · `check-concurrency.ts` | seed نمایشی · ساخت ادمین (`npm run admin:create`) · تست همزمانی انبار |
 | `lib/env.ts` | تنها نقطه‌ی خواندن env (Zod) |
-| `next.config.ts` · `vercel.json` | تنظیمات Next · دستور build و کرون روزانه روی Vercel |
+| `next.config.ts` | تنظیمات Next (`vercel.json` فعلاً نداریم) |
 | `.env.example` · `docs/` | نمونه‌ی env · CLAUDE/ARCHITECTURE/CHECKLIST/STRUCTURE |
 | `uploads/` (gitignore) | تصاویر آپلودشده‌ی درایور `local` |
 
