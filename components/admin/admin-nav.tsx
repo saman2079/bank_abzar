@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Boxes, ClipboardList, FileText, LayoutDashboard, Package, ScrollText, Settings, Tags, Users, Warehouse } from "lucide-react";
 import type { Role } from "@/modules/auth/constants";
+import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/admin", label: "داشبورد", Icon: LayoutDashboard, adminOnly: false },
@@ -15,21 +19,31 @@ const items = [
   { href: "/admin/settings", label: "تنظیمات", Icon: Settings, adminOnly: true },
 ] as const;
 
+/** منوی عمودی پنل؛ لینک صفحه‌ی فعلی هایلایت می‌شود. در دسکتاپ سایدبار ثابت و در موبایل داخل کشو است. */
 export function AdminNav({ role }: { role: Role }) {
+  const pathname = usePathname();
+
   return (
-    <nav aria-label="منوی مدیریت" className="flex gap-2 overflow-x-auto md:flex-col">
+    <nav aria-label="منوی مدیریت" className="flex flex-col gap-2">
       {items
         .filter((item) => !item.adminOnly || role === "ADMIN")
-        .map(({ href, label, Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className="border-border hover:border-primary hover:text-primary flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-sm transition-colors"
-          >
-            <Icon className="size-4" aria-hidden />
-            {label}
-          </Link>
-        ))}
+        .map(({ href, label, Icon }) => {
+          const active = href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`);
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "hover:border-primary hover:text-primary flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm transition-colors",
+                active ? "border-primary text-primary bg-primary/10 font-bold" : "border-border",
+              )}
+            >
+              <Icon className="size-4" aria-hidden />
+              {label}
+            </Link>
+          );
+        })}
     </nav>
   );
 }

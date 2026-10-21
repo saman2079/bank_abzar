@@ -43,4 +43,4 @@
 `db` (Prisma)، `session`/`dal` (سشن و `requireUser/Staff/Admin`)، `rate-limit` (Postgres)، `audit`، `cache` (تگ‌ها)، `sms/` (console/kavenegar)، `payments/` (اینترفیس + زرین‌پال)، `storage/` (درایور `local` و `blob` برای تصاویر)، `seo`، `format`، `phone`، `date`، `form`، `query-params`، `db-errors`، `maintenance`، `request`.
 
 ## `components/`
-`ui/` پایه · `layout/` هدر/فوتر/ناوبری · `home/` هوم · `catalog/` لیست · `shared/` (کارت محصول، `product-image`، JSON-LD، breadcrumb) · `auth/` · `account/` · `cart/` · `orders/` · `invoices/` (سند چاپی A4 + نشان وضعیت + دکمه‌ی چاپ) · `admin/` (فرم‌ها و جدول‌های پنل؛ `product-images`، `manual-order-form`، `shipping-settings-form`، …).
+`ui/` پایه · `layout/` هدر/فوتر/ناوبری · `home/` هوم · `catalog/` لیست · `shared/` (کارت محصول، `product-image`، JSON-LD، breadcrumb) · `auth/` · `account/` · `cart/` · `orders/` · `invoices/` (سند چاپی A4 + نشان وضعیت + دکمه‌ی چاپ) · `admin/` (منوی ریسپانسیو `admin-nav`/`admin-mobile-nav`، فرم‌ها و جدول‌های پنل؛ `product-images`، `manual-order-form`، `shipping-settings-form`، …).
