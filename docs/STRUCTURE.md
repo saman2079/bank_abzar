@@ -16,7 +16,7 @@
 ## `app/` — فقط routing
 | مسیر | بخش |
 |---|---|
-| `(storefront)/` | سایت مشتری: `page.tsx` هوم، `products`، `categories`، `cart`، `checkout`، `login`، `about/contact/rules`، `account/` (پروفایل، آدرس‌ها، سفارش‌ها) |
+| `(storefront)/` | سایت مشتری: `blog` (لیست) و `blog/[slug]` (مقاله + ریدایرکت نامک قدیمی)، `page.tsx` هوم، `products`، `categories`، `cart`، `checkout`، `login`، `about/contact/rules`، `account/` (پروفایل، آدرس‌ها، سفارش‌ها) |
 | `admin/login` | ورود ادمین/کارمند (رمز) |
 | `admin/(panel)/` | پنل (گیت `requireStaff`): `page.tsx` داشبورد، `products`، `categories`، `brands`، `inventory`، `orders` (+`new` سفارش دستی، `[id]`)، `invoices` (+`new`، `[id]` سند/چاپ، `[id]/edit`)، `users` (ADMIN)، `audit` (ADMIN)، `settings` (ADMIN) |
 | `api/payments/zarinpal/callback` | بازگشت درگاه → verify → PAID |
@@ -35,6 +35,7 @@
 | `payments/` | شروع پرداخت، settle، reconcile |
 | `invoices/` | **فاکتور/پیش‌فاکتور فروش خارج از سایت**: `constants` (وضعیت‌ها، `calcInvoiceTotals`، `INVOICE_SELLER`)، `schemas`، `service` (ذخیره/ویرایش پیش‌فاکتور، قطعی‌کردن با کسر اتمیک انبار، ابطال با برگشت موجودی)، `queries`، `actions` |
 | `articles/` | مقاله (فاز ۷): `constants`، `schemas`، `service` (sanitize + تاریخچه‌ی نامک)، `actions`، `admin/queries`؛ ادیتور: `components/admin/rich-text-editor.tsx`؛ `lib/sanitize.ts` |
+| `seo/` | داده‌ی `sitemap.xml` (کش‌شده): `queries.ts`؛ فایل‌های `app/sitemap.ts` و `app/robots.ts` |
 | `inventory/` | تغییر دستی موجودی + دفتر `StockMovement` |
 | `media/` | پردازش sharp→WebP، افزودن/حذف/جابه‌جایی/alt تصاویر محصول |
 | `settings/` | تنظیمات فروشگاه (فعلاً هزینه‌ی ارسال) |
