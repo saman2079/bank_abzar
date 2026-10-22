@@ -7,7 +7,7 @@
 - `master` (کامیت `cae5b91`) منبع حقیقت است؛ همه‌ی فاز ۰–۶B روی آن است (تصاویر، سفارش دستی، تنظیمات ارسال، کرون با GET/POST). شاخه‌ی `main` در ریموت قدیمی/اضافه است و باید توسط کاربر پاک شود (`git push origin --delete main`)؛ اجازه‌ی حذف از سمت Claude نیست.
 - **کارهای فوری باز روی master:** (۱) `zod` و `sharp` در کد import شده‌اند ولی در `package.json` نیستند → `npm i zod sharp` و `npm i -D prettier`؛ (۲) مایگریشن `settings` ساخته نشده (فقط `init` هست) → `npm run db:migrate -- --name settings` و کامیت پوشه‌ی migrations؛ (۳) پوشه‌ی `generated/` در گیت است → `git rm -r --cached generated` و `/generated` در `.gitignore`؛ (۴) `ci.yml` فقط روی push به `main` اجرا می‌شود → به `master` تغییر بده؛ (۵) `CLAUDE.md` (ریشه) و `docs/ARCHITECTURE.md` در ریپو نیستند.
 - **Vercel:** فعلاً تصمیم: دمو نمی‌خواهیم؛ `vercel.json` ساخته نمی‌شود (در صورت نیاز: `{"buildCommand":"prisma migrate deploy && next build","crons":[{"path":"/api/internal/cron","schedule":"0 3 * * *"}]}`).
-- **به‌روز (۲۰۲۶-۱۰-۲۲):** روی `master` علاوه بر ۶B: فاز ۶C (فاکتور/پیش‌فاکتور + چاپ A4)، پنل ادمین ریسپانسیو با منوی کشویی موبایل، فاز ۷A (مدیریت مقاله + Tiptap + sanitize؛ migration `articles` دست‌نویس). **۷B (وبلاگ عمومی، sitemap/robots، JSON-LD، ریدایرکت نامک مقاله) تحویل شده و تا تأیید کاربر روی master نیست.** هیچ‌کدام از ۶C/۷A/۷B هنوز lint/typecheck/build نشده‌اند؛ نیاز به `npm i` پکیج‌های tiptap و `sanitize-html` و `db:migrate`.
+- **به‌روز (۲۰۲۶-۱۰-۲۲):** روی `master` علاوه بر ۶B: فاز ۶C (فاکتور/پیش‌فاکتور + چاپ A4)، پنل ادمین ریسپانسیو با منوی کشویی موبایل، فاز ۷A (مدیریت مقاله + Tiptap + sanitize؛ migration `articles` دست‌نویس). **۷B (وبلاگ عمومی، sitemap/robots، JSON-LD، ریدایرکت نامک مقاله) هم روی master است.** هیچ‌کدام از ۶C/۷A/۷B هنوز lint/typecheck/build نشده‌اند؛ نیاز به `npm i` پکیج‌های tiptap و `sanitize-html` و `db:migrate`.
 - **گام بعدی:** تأیید/رفع خطای ۷A و ۷B؛ بعد فاز ۸ (امنیت و کیفیت). کار باز مرتبط با سئو: ریدایرکت نامک محصول/دسته، تصویر پیش‌فرض OG، لوگو در Organization، بخش «مقالات تازه» در صفحه‌ی اصلی.
 - لینت/typecheck/build هیچ‌وقت توسط Claude اجرا نشده (sandbox بدون npm)؛ کاربر اجرا می‌کند و خطاها را می‌فرستد.
 
@@ -107,7 +107,7 @@
 ## فاز ۷ — مقاله و سئو
 - [x] مدل و CRUD مقاله + پیش‌نویس/انتشار (۷A — تحویل‌شده، تأیید نشده؛ migration `articles` دست‌نویس است، با `db:migrate` بررسی شود)
 - [x] ادیتور Tiptap (RTL، تصویر، جدول، لینک، heading) + sanitize (۷A؛ نیاز به `npm i` پکیج‌های tiptap و sanitize-html)
-- [x] صفحات `/blog` و `/blog/[slug]` با JSON-LD Article (۷B — تحویل‌شده، تأیید نشده)
+- [x] صفحات `/blog` و `/blog/[slug]` با JSON-LD Article (۷B — روی master، تأیید نشده)
 - [x] `generateMetadata` همه صفحات + canonical + OG (صفحه‌های فروشگاه از قبل؛ مقاله با OG نوع article در ۷B)
 - [x] JSON-LD: Product, Breadcrumb ✓؛ Organization, WebSite روی صفحه‌ی اصلی (۷B)
 - [x] `sitemap.ts` و `robots.ts` (۷B؛ داده از `modules/seo/queries.ts`)

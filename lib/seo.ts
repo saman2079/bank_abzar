@@ -53,3 +53,57 @@ export function breadcrumbJsonLd(items: BreadcrumbItem[]) {
     })),
   };
 }
+
+export const SITE_NAME = "بانک ابزار";
+
+/** schema.org Organization؛ لوگو/تلفن/شبکه‌های اجتماعی بعد از گرفتن اطلاعات از صاحب فروشگاه اضافه شود. */
+export function organizationJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_NAME,
+    url: absoluteUrl("/"),
+  };
+}
+
+/** WebSite + کادر جستجوی سایت (به `/products?q=` وصل است). */
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: absoluteUrl("/"),
+    inLanguage: "fa-IR",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: `${absoluteUrl("/products")}?q={search_term_string}` },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+export type ArticleJsonLdInput = {
+  slug: string;
+  title: string;
+  description: string;
+  coverUrl: string | null;
+  publishedAt: Date;
+  updatedAt: Date;
+};
+
+export function articleJsonLd(article: ArticleJsonLdInput) {
+  const url = absoluteUrl(`/blog/${article.slug}`);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.description,
+    inLanguage: "fa-IR",
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    datePublished: article.publishedAt.toISOString(),
+    dateModified: article.updatedAt.toISOString(),
+    ...(article.coverUrl && { image: [article.coverUrl.startsWith("http") ? article.coverUrl : absoluteUrl(article.coverUrl)] }),
+    author: { "@type": "Organization", name: SITE_NAME, url: absoluteUrl("/") },
+    publisher: { "@type": "Organization", name: SITE_NAME, url: absoluteUrl("/") },
+  };
+}

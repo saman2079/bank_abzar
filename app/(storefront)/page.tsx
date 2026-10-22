@@ -5,6 +5,8 @@ import { Hero } from "@/components/home/hero";
 import { PromoBanners } from "@/components/home/promo-banners";
 import { ToolFinder } from "@/components/home/tool-finder";
 import { TrustBar } from "@/components/home/trust-bar";
+import { JsonLd } from "@/components/shared/json-ld";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import { listCategories, listFeaturedProducts } from "@/modules/catalog/queries";
 
 export const metadata: Metadata = {
@@ -17,6 +19,8 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-10">
+      <JsonLd data={organizationJsonLd()} />
+      <JsonLd data={websiteJsonLd()} />
       <Hero />
       <CategoryStrip categories={categories} />
       <FeaturedProducts products={featured} />

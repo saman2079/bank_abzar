@@ -9,6 +9,7 @@ const navItems = [
   { href: "/", label: "صفحه اصلی" },
   { href: "/products", label: "فروشگاه" },
   { href: "/categories", label: "دسته‌بندی‌ها" },
+  { href: "/blog", label: "مقالات" },
   { href: "/about", label: "درباره ما" },
   { href: "/contact", label: "تماس با ما" },
 ] as const;
