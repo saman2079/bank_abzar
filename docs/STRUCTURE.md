@@ -34,6 +34,7 @@
 | `orders/` | `placeOrder` (تراکنش اتمیک)، لغو/انقضا؛ `admin/` = تغییر وضعیت، لیست/جزئیات، **ثبت سفارش دستی** (`manual-service.ts`) |
 | `payments/` | شروع پرداخت، settle، reconcile |
 | `invoices/` | **فاکتور/پیش‌فاکتور فروش خارج از سایت**: `constants` (وضعیت‌ها، `calcInvoiceTotals`، `INVOICE_SELLER`)، `schemas`، `service` (ذخیره/ویرایش پیش‌فاکتور، قطعی‌کردن با کسر اتمیک انبار، ابطال با برگشت موجودی)، `queries`، `actions` |
+| `articles/` | مقاله (فاز ۷): `constants`، `schemas`، `service` (sanitize + تاریخچه‌ی نامک)، `actions`، `admin/queries`؛ ادیتور: `components/admin/rich-text-editor.tsx`؛ `lib/sanitize.ts` |
 | `inventory/` | تغییر دستی موجودی + دفتر `StockMovement` |
 | `media/` | پردازش sharp→WebP، افزودن/حذف/جابه‌جایی/alt تصاویر محصول |
 | `settings/` | تنظیمات فروشگاه (فعلاً هزینه‌ی ارسال) |

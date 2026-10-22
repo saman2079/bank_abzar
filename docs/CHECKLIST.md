@@ -104,8 +104,8 @@
 - [ ] مشخصات فروشنده روی فاکتور (`INVOICE_SELLER`) از صاحب فروشگاه
 
 ## فاز ۷ — مقاله و سئو
-- [ ] مدل و CRUD مقاله + پیش‌نویس/انتشار
-- [ ] ادیتور Tiptap (RTL، تصویر، جدول، لینک، heading) + sanitize
+- [x] مدل و CRUD مقاله + پیش‌نویس/انتشار (۷A — تحویل‌شده، تأیید نشده؛ migration `articles` دست‌نویس است، با `db:migrate` بررسی شود)
+- [x] ادیتور Tiptap (RTL، تصویر، جدول، لینک، heading) + sanitize (۷A؛ نیاز به `npm i` پکیج‌های tiptap و sanitize-html)
 - [ ] صفحات `/blog` و `/blog/[slug]` با JSON-LD Article
 - [ ] `generateMetadata` همه صفحات + canonical + OG
 - [ ] JSON-LD: Product, Breadcrumb, Organization, WebSite

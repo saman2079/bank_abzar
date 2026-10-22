@@ -53,3 +53,96 @@
     color: #000 !important;
   }
 }
+
+/* محتوای مقاله: هم در ادیتور پنل و هم در صفحه‌ی عمومی وبلاگ (کلاس rich-content) */
+.rich-content {
+  line-height: 2;
+  font-size: 1rem;
+}
+.rich-content > * + * {
+  margin-top: 1rem;
+}
+.rich-content h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-top: 2rem;
+}
+.rich-content h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-top: 1.5rem;
+}
+.rich-content h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.rich-content a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.rich-content ul {
+  list-style: disc;
+  padding-inline-start: 1.5rem;
+}
+.rich-content ol {
+  list-style: decimal;
+  padding-inline-start: 1.5rem;
+}
+.rich-content li > p {
+  margin: 0;
+}
+.rich-content blockquote {
+  border-inline-start: 4px solid var(--color-primary);
+  background: var(--color-surface-2);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--color-muted);
+}
+.rich-content hr {
+  border-color: var(--color-border);
+}
+.rich-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  margin-inline: auto;
+}
+.rich-content code {
+  background: var(--color-surface-2);
+  border-radius: 0.375rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.9em;
+}
+.rich-content pre {
+  background: var(--color-surface-2);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  overflow-x: auto;
+  direction: ltr;
+}
+.rich-content table {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+}
+.rich-content th,
+.rich-content td {
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  text-align: start;
+  min-width: 6rem;
+  vertical-align: top;
+}
+.rich-content th {
+  background: var(--color-surface-2);
+  font-weight: 700;
+}
+.rich-content td > p,
+.rich-content th > p {
+  margin: 0;
+}
+.rich-content .selectedCell {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}

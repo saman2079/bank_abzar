@@ -417,3 +417,47 @@ enum InvoiceStatus {
   FINAL
   CANCELED
 }
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+/// مقاله‌ی وبلاگ (سئو). فقط `contentHtml` به‌صورت عمومی رندر می‌شود و همیشه قبل از ذخیره sanitize شده است.
+model Article {
+  id             String               @id @default(cuid())
+  title          String
+  slug           String               @unique
+  excerpt        String
+  /// HTML پاک‌سازی‌شده (sanitize سمت سرور)
+  contentHtml    String
+  /// JSON ادیتور Tiptap فقط برای ویرایش مجدد
+  contentJson    Json
+  coverUrl       String?
+  coverAlt       String?
+  status         ArticleStatus        @default(DRAFT)
+  /// اولین زمان انتشار؛ با انتشار دوباره عوض نمی‌شود
+  publishedAt    DateTime?
+  readingMinutes Int                  @default(1)
+  seoTitle       String?
+  seoDescription String?
+  createdById    String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  slugHistory    ArticleSlugHistory[]
+
+  @@index([status, publishedAt])
+}
+
+/// نامک‌های قبلی مقاله؛ برای ریدایرکت ۳۰۱ بعد از تغییر slug
+model ArticleSlugHistory {
+  id        String   @id @default(cuid())
+  articleId String
+  slug      String
+  createdAt DateTime @default(now())
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+  @@index([articleId])
+}
