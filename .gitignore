@@ -43,3 +43,8 @@ next-env.d.ts
 # تصاویر آپلودشده (درایور local)
 /uploads
 !.env.example
+
+# تست‌ها
+/test-results
+/playwright-report
+/e2e/.auth

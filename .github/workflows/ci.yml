@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [master]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -12,10 +12,16 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       DATABASE_URL: postgresql://bank_abzar:bank_abzar_ci@localhost:5432/bank_abzar
-      NEXT_PUBLIC_SITE_URL: https://example.com
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      # فقط برای CI (مقدار واقعی نیست)؛ env.ts این‌ها را اجباری می‌کند.
+      SESSION_SECRET: ci-only-session-secret-0123456789abcdef
+      CRON_SECRET: ci-only-cron-secret-0123456789
+      # ادمین موقت فقط برای تست e2e روی دیتابیس CI
+      E2E_ADMIN_PHONE: "09120000000"
+      E2E_ADMIN_PASSWORD: ci-only-admin-password-123
     services:
       postgres:
         image: postgres:17-alpine
@@ -42,7 +48,7 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm run typecheck
-      - run: npm test --if-present
+      - run: npm test
 
       # build صفحه‌های کاتالوگ را از دیتابیس می‌خواند، پس اول schema و seed.
       - run: npm run db:deploy
@@ -50,3 +56,18 @@ jobs:
       - run: npm run build
 
       - run: npm audit --omit=dev --audit-level=high
+
+      # تست سرتاسری روی build واقعی (Chromium)؛ اسکریپت admin:create فایل .env.local را می‌خواهد.
+      - run: touch .env.local
+      - run: ADMIN_PASSWORD="$E2E_ADMIN_PASSWORD" npm run admin:create -- "$E2E_ADMIN_PHONE" "ادمین تست"
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7

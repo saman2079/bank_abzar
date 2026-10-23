@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { ProductGrid } from "@/components/shared/product-grid";
 import { formatNumber } from "@/lib/format";
+import { rateLimit } from "@/lib/rate-limit";
+import { getRequestMeta } from "@/lib/request";
 import { DEFAULT_SORT, PRODUCT_SORTS, PRODUCT_SORT_LABELS } from "@/modules/catalog/constants";
 import { listBrands, listCategories, listProducts } from "@/modules/catalog/queries";
 import { productListQuerySchema } from "@/modules/catalog/schemas";
@@ -34,6 +36,19 @@ export async function ProductListing({ searchParams, basePath, fixedCategory }: 
     sort: first(raw.sort),
     page: first(raw.page),
   });
+
+  // جستجوی متنی کش نمی‌شود و به DB می‌رسد؛ سقف تعداد جستجو برای هر IP (ضد اسکرپ/فشار).
+  if (query.q) {
+    const { ip } = await getRequestMeta();
+    const limit = await rateLimit(`search:${ip}`, 40, 60);
+    if (!limit.ok) {
+      return (
+        <p role="alert" className="text-danger py-10 text-center text-sm">
+          تعداد جستجوها زیاد است؛ چند لحظه بعد دوباره تلاش کنید.
+        </p>
+      );
+    }
+  }
 
   const [result, categories, brands] = await Promise.all([
     listProducts(query),

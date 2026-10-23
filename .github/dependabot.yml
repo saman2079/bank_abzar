@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # نسخه‌های Next/React/Prisma با هم بالا بروند تا ناسازگاری پیش نیاید
+      framework:
+        patterns: ["next", "react", "react-dom", "eslint-config-next", "@types/react*"]
+      prisma:
+        patterns: ["prisma", "@prisma/*"]
+      tiptap:
+        patterns: ["@tiptap/*"]
+      dev-tools:
+        dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # ارتقای major فریم‌ورک دستی و با بررسی داک‌های همراه نسخه انجام شود
+      - dependency-name: next
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

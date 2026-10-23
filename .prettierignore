@@ -5,3 +5,5 @@ package-lock.json
 next-env.d.ts
 generated
 prisma/migrations
+test-results
+playwright-report

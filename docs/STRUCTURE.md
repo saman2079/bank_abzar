@@ -46,3 +46,6 @@
 
 ## `components/`
 `ui/` پایه · `layout/` هدر/فوتر/ناوبری · `home/` هوم · `catalog/` لیست · `shared/` (کارت محصول، `product-image`، JSON-LD، breadcrumb) · `auth/` · `account/` · `cart/` · `orders/` · `invoices/` (سند چاپی A4 + نشان وضعیت + دکمه‌ی چاپ) · `admin/` (منوی ریسپانسیو `admin-nav`/`admin-mobile-nav`، فرم‌ها و جدول‌های پنل؛ `product-images`، `manual-order-form`، `shipping-settings-form`، …).
+
+## تست و امنیت (فاز ۸)
+`tests/unit/*.test.ts` + `tests/stubs/server-only.ts` + `vitest.config.ts` (واحد) · `e2e/` (`auth.setup.ts`، `public/smoke.spec.ts`، `admin/panel.spec.ts`) + `playwright.config.ts` · `.github/workflows/{ci,security}.yml` + `.github/dependabot.yml` · `docs/SECURITY.md` · هدرها/CSP در `next.config.ts`.

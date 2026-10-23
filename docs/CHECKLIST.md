@@ -8,7 +8,8 @@
 - **کارهای فوری باز روی master:** (۱) `zod` و `sharp` در کد import شده‌اند ولی در `package.json` نیستند → `npm i zod sharp` و `npm i -D prettier`؛ (۲) مایگریشن `settings` ساخته نشده (فقط `init` هست) → `npm run db:migrate -- --name settings` و کامیت پوشه‌ی migrations؛ (۳) پوشه‌ی `generated/` در گیت است → `git rm -r --cached generated` و `/generated` در `.gitignore`؛ (۴) `ci.yml` فقط روی push به `main` اجرا می‌شود → به `master` تغییر بده؛ (۵) `CLAUDE.md` (ریشه) و `docs/ARCHITECTURE.md` در ریپو نیستند.
 - **Vercel:** فعلاً تصمیم: دمو نمی‌خواهیم؛ `vercel.json` ساخته نمی‌شود (در صورت نیاز: `{"buildCommand":"prisma migrate deploy && next build","crons":[{"path":"/api/internal/cron","schedule":"0 3 * * *"}]}`).
 - **به‌روز (۲۰۲۶-۱۰-۲۲):** روی `master` علاوه بر ۶B: فاز ۶C (فاکتور/پیش‌فاکتور + چاپ A4)، پنل ادمین ریسپانسیو با منوی کشویی موبایل، فاز ۷A (مدیریت مقاله + Tiptap + sanitize؛ migration `articles` دست‌نویس). **۷B (وبلاگ عمومی، sitemap/robots، JSON-LD، ریدایرکت نامک مقاله) هم روی master است.** هیچ‌کدام از ۶C/۷A/۷B هنوز lint/typecheck/build نشده‌اند؛ نیاز به `npm i` پکیج‌های tiptap و `sanitize-html` و `db:migrate`.
-- **گام بعدی:** تأیید/رفع خطای ۷A و ۷B؛ بعد فاز ۸ (امنیت و کیفیت). کار باز مرتبط با سئو: ریدایرکت نامک محصول/دسته، تصویر پیش‌فرض OG، لوگو در Organization، بخش «مقالات تازه» در صفحه‌ی اصلی.
+- **به‌روز (۲۰۲۶-۱۰-۲۳):** فاز ۸ (هدر/CSP، rate-limit جستجو و سبد، Vitest، Playwright، CI/security/Dependabot، `docs/SECURITY.md`) روی master است و اجرا نشده.
+- **گام بعدی:** تأیید/رفع خطای ۷A/۷B/۸ (نصب vitest و playwright)؛ بعد فاز ۹ (Docker، CI/CD، سرور). کار باز مرتبط با سئو: ریدایرکت نامک محصول/دسته، تصویر پیش‌فرض OG، لوگو در Organization، بخش «مقالات تازه» در صفحه‌ی اصلی.
 - لینت/typecheck/build هیچ‌وقت توسط Claude اجرا نشده (sandbox بدون npm)؛ کاربر اجرا می‌کند و خطاها را می‌فرستد.
 
 **شیوه کار:** پیش‌فرض: روی ریپوی کاربر کامیت/پوش نکن، مگر کاربر صریحاً بخواهد (تصاویر فقط یک‌بار به درخواست او پوش شد و بعد روی `master` رفت). هر کد را با مسیر و «برای کدام بخش» توضیح بده. فایل‌های کامل و آماده‌ی کپی‌پیست بده (کوتاه، بدون توضیح اضافه)، و بعد از هر تحویل کد همین چک‌لیست را آپدیت کن.
@@ -115,14 +116,16 @@
 - [x] revalidation بعد از ویرایش ادمین (کاتالوگ + مقاله با `updateTag`)
 - [ ] بررسی Lighthouse/CWV و Search Console
 
-## فاز ۸ — امنیت و کیفیت
-- [ ] هدرهای امنیتی + CSP
-- [ ] بررسی IDOR همه مسیرهای کاربر
-- [ ] rate-limit روی OTP ✓ / لاگین ادمین ✓ — مانده: آپلود/جستجو
-- [ ] تست‌های Vitest (انبار، سفارش، OTP، قیمت)
-- [ ] تست‌های Playwright (مسیر خرید، ادمین)
-- [ ] `npm audit` + Dependabot + secret scanning
-- [ ] مرور نهایی امنیت (OWASP Top 10)
+## فاز ۸ — امنیت و کیفیت (کد روی master؛ اجرا/تأیید نشده)
+- [x] هدرهای امنیتی + CSP (`next.config.ts`) — بعد از build روی پرداخت زرین‌پال و ادیتور Tiptap تست شود
+- [x] بررسی IDOR همه مسیرهای کاربر (نتیجه در `docs/SECURITY.md`)
+- [x] rate-limit: OTP، لاگین ادمین، آپلود، جستجو (۴۰/دقیقه)، سبد (۱۲۰/دقیقه)
+- [x] تست‌های Vitest (`tests/unit/`: phone، redirect، money/فاکتور، query-params، sanitize، storage-path) — مانده: تست انبار/سفارش روی DB واقعی
+- [x] تست‌های Playwright (`e2e/`: smoke عمومی/سئو/هدرها/دسترسی ناشناس، ادمین + چرخه‌ی فاکتور) — مسیر خرید کامل مشتری (نیاز به OTP) ننوشته شد
+- [x] `npm audit` + Dependabot + gitleaks + CodeQL (`.github/workflows/security.yml`, `dependabot.yml`)
+- [x] مرور OWASP (`docs/SECURITY.md`)
+- [ ] کاربر: `npm i -D vitest @playwright/test` (و کامیت `package-lock.json`؛ تا آن موقع `npm ci` در CI می‌شکند)، اجرای `npm test`، `npm run test:e2e`، lint/typecheck/build
+- [ ] کاربر: secretهای GitHub برای e2e ادمین (`E2E_ADMIN_PASSWORD` در ci.yml) را بررسی کند
 
 ## فاز ۹ — Docker، CI/CD، سرور
 - [ ] `next.config.ts` → `output: 'standalone'`
