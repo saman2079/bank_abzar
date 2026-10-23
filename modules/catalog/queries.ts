@@ -14,7 +14,7 @@ export type ProductPage = {
   totalPages: number;
 };
 
-const productInclude = {
+export const productInclude = {
   brand: { select: { name: true } },
   category: { select: { slug: true } },
   images: { orderBy: [{ sortOrder: "asc" }, { id: "asc" }], select: { url: true, alt: true } },
@@ -22,7 +22,7 @@ const productInclude = {
 
 type ProductRow = Prisma.ProductGetPayload<{ include: typeof productInclude }>;
 
-function toProductDetail(row: ProductRow): ProductDetail {
+export function toProductDetail(row: ProductRow): ProductDetail {
   const specs = productSpecsSchema.safeParse(row.specs);
   const images = row.images.map((image) => ({ url: image.url, alt: image.alt }));
 

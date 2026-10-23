@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Heart, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ProductImage } from "@/components/shared/product-image";
+import { FavoriteButton } from "@/components/wishlist/favorite-button";
 import { Badge } from "@/components/ui/badge";
 import { discountPercent, formatNumber, formatToman } from "@/lib/format";
 import type { ProductSummary } from "@/modules/catalog/types";
@@ -14,13 +15,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="border-border bg-surface hover:border-primary/60 group relative flex h-full flex-col rounded-card border p-3 transition-colors">
       <div className="flex items-center justify-between">
-        <button
-          type="button"
-          aria-label="افزودن به علاقه‌مندی‌ها"
-          className="text-muted hover:text-danger relative z-10 grid size-8 place-items-center rounded-full transition-colors"
-        >
-          <Heart className="size-4" aria-hidden />
-        </button>
+        <FavoriteButton productId={product.id} productName={product.name} />
         {!product.inStock ? (
           <Badge>ناموجود</Badge>
         ) : discount > 0 ? (

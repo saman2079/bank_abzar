@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 const links = [
   { href: "/account", label: "پروفایل" },
   { href: "/account/orders", label: "سفارش‌ها" },
+  { href: "/account/wishlist", label: "علاقه‌مندی‌ها" },
   { href: "/account/addresses", label: "آدرس‌ها" },
 ] as const;
 

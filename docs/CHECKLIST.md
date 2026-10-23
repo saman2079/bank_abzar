@@ -9,6 +9,7 @@
 - **Vercel:** فعلاً تصمیم: دمو نمی‌خواهیم؛ `vercel.json` ساخته نمی‌شود (در صورت نیاز: `{"buildCommand":"prisma migrate deploy && next build","crons":[{"path":"/api/internal/cron","schedule":"0 3 * * *"}]}`).
 - **به‌روز (۲۰۲۶-۱۰-۲۲):** روی `master` علاوه بر ۶B: فاز ۶C (فاکتور/پیش‌فاکتور + چاپ A4)، پنل ادمین ریسپانسیو با منوی کشویی موبایل، فاز ۷A (مدیریت مقاله + Tiptap + sanitize؛ migration `articles` دست‌نویس). **۷B (وبلاگ عمومی، sitemap/robots، JSON-LD، ریدایرکت نامک مقاله) هم روی master است.** هیچ‌کدام از ۶C/۷A/۷B هنوز lint/typecheck/build نشده‌اند؛ نیاز به `npm i` پکیج‌های tiptap و `sanitize-html` و `db:migrate`.
 - **به‌روز (۲۰۲۶-۱۰-۲۳):** فاز ۸ (هدر/CSP، rate-limit جستجو و سبد، Vitest، Playwright، CI/security/Dependabot، `docs/SECURITY.md`) روی master است و اجرا نشده.
+- **به‌روز (۲۰۲۶-۱۰-۲۳):** صفحه‌ی علاقه‌مندی‌ها (`/account/wishlist`، مدل `WishlistItem`، قلب فعال روی کارت، `/api/wishlist`) روی master است؛ اجرا نشده؛ نیاز به `prisma generate` و `db:migrate` (مایگریشن دست‌نویس).
 - **گام بعدی:** تأیید/رفع خطای ۷A/۷B/۸ (نصب vitest و playwright)؛ بعد فاز ۹ (Docker، CI/CD، سرور). کار باز مرتبط با سئو: ریدایرکت نامک محصول/دسته، تصویر پیش‌فرض OG، لوگو در Organization، بخش «مقالات تازه» در صفحه‌ی اصلی.
 - لینت/typecheck/build هیچ‌وقت توسط Claude اجرا نشده (sandbox بدون npm)؛ کاربر اجرا می‌کند و خطاها را می‌فرستد.
 
@@ -37,7 +38,7 @@
 
 **قانون cacheComponents:** `searchParams` فقط داخل `<Suspense>` خوانده شود (`ProductListing`). `params` صفحه‌ی محصول/دسته بیرون Suspense و همراه `generateStaticParams` خوانده می‌شود تا slug ناموجود ۴۰۴ واقعی بدهد؛ سازگاری این الگو با Next 16.4 هنوز تأیید نشده و اگر build خطای blocking-route داد باید اصلاح شود.
 
-**نکته‌های باز:** `app/not-found.tsx` بدون هدر/فوتر است (۴۰۴ داخل storefront هم از همین می‌آید)؛ تصاویر هیرو/بنرها هنوز placeholder هستند (تصاویر محصول واقعی شد)؛ دکمه‌های سبد و علاقه‌مندی فقط ظاهری‌اند تا فاز ۴؛ لینک «علاقه‌مندی» (`/account/wishlist`) هنوز صفحه ندارد. تأییدنشده‌ها در فاز ۳: آداپتر کاوه‌نگار با پنل واقعی؛ اینکه `@node-rs/argon2` خودکار external می‌شود (اگر build شکایت کرد `serverExternalPackages: ["@node-rs/argon2"]` را به `next.config.ts` اضافه کن)؛ رفتار `redirect()` داخل Suspense در لی‌اوت‌های account/admin. فقط توابع خالص (`phone.ts`, `redirect.ts`) واقعاً اجرا و تست شده‌اند.
+**نکته‌های باز:** `app/not-found.tsx` بدون هدر/فوتر است (۴۰۴ داخل storefront هم از همین می‌آید)؛ تصاویر هیرو/بنرها هنوز placeholder هستند (تصاویر محصول واقعی شد)؛ دکمه‌های سبد و علاقه‌مندی فقط ظاهری‌اند تا فاز ۴؛  تأییدنشده‌ها در فاز ۳: آداپتر کاوه‌نگار با پنل واقعی؛ اینکه `@node-rs/argon2` خودکار external می‌شود (اگر build شکایت کرد `serverExternalPackages: ["@node-rs/argon2"]` را به `next.config.ts` اضافه کن)؛ رفتار `redirect()` داخل Suspense در لی‌اوت‌های account/admin. فقط توابع خالص (`phone.ts`, `redirect.ts`) واقعاً اجرا و تست شده‌اند.
 
 ## فاز ۰ — آماده‌سازی ریپو
 - [ ] کپی `CLAUDE.md` در ریشه و `ARCHITECTURE.md` + `CHECKLIST.md` در `docs/`

@@ -66,6 +66,7 @@ model Product {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   cartItems         CartItem[]
+  wishlistItems     WishlistItem[]
   orderItems        OrderItem[]
   brand             Brand           @relation(fields: [brandId], references: [id])
   category          Category        @relation(fields: [categoryId], references: [id])
@@ -110,6 +111,7 @@ model User {
   cartItems       CartItem[]
   orders          Order[]
   sessions        Session[]
+  wishlistItems   WishlistItem[]
 
   @@index([role])
 }
@@ -173,6 +175,19 @@ model RateLimit {
 }
 
 /// سبد کاربر لاگین‌شده. سبد مهمان در کوکی است و هنگام ورود merge می‌شود.
+/// علاقه‌مندی‌های کاربر (فقط کاربر واردشده)
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId, createdAt])
+}
+
 model CartItem {
   id        String   @id @default(cuid())
   userId    String
