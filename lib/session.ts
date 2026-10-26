@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { getRequestMeta } from "@/lib/request";
@@ -45,6 +46,8 @@ export async function createSession(userId: string, role: Role): Promise<void> {
 }
 
 export async function readSessionUser(): Promise<SessionUser | null> {
+  // با cacheComponents، `new Date()` (انقضای سشن) فقط بعد از دسترسی صریح به درخواست مجاز است.
+  await connection();
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token || token.length > 128) return null;
 
