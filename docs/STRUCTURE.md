@@ -50,3 +50,5 @@
 
 ## تست و امنیت (فاز ۸)
 `tests/unit/*.test.ts` + `tests/stubs/server-only.ts` + `vitest.config.ts` (واحد) · `e2e/` (`auth.setup.ts`، `public/smoke.spec.ts`، `admin/panel.spec.ts`) + `playwright.config.ts` · `.github/workflows/{ci,security}.yml` + `.github/dependabot.yml` · `docs/SECURITY.md` · هدرها/CSP در `next.config.ts`.
+
+`.env.example` — فهرست متغیرهای محیطی (کپی به `.env.local`؛ همان نام‌ها در Vercel).

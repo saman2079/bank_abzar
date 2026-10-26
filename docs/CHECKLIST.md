@@ -69,7 +69,7 @@
 - [x] اتصال صفحات فروشگاه به DB (صفحه‌ی اصلی async شد) — تأیید با اجرای واقعی مانده
 
 ## فاز ۳ — احراز هویت و حساب
-- [x] اینترفیس SMS + provider کنسول (dev) + کاوه‌نگار (تست‌نشده با پنل واقعی؛ از روی حافظه نوشته شده)
+- [x] اینترفیس SMS + provider کنسول (dev) + کاوه‌نگار Verify Lookup با REST (POST، بدون پکیج npm؛ خطا با کد کاوه‌نگار `KavenegarError`؛ تست واحد با fetch ساختگی؛ ⚠️ با پنل/قالب واقعی هنوز تست نشده) — `.env.example` اضافه شد
 - [x] OTP (HMAC، انقضا ۲ دقیقه، ۵ تلاش اتمیک، یک‌بارمصرف، rate-limit شماره/IP + cooldown)
 - [x] سشن DB-backed + کوکی امن + logout
 - [x] نقش‌ها و `requireUser/requireStaff/requireAdmin` (`lib/dal.ts`)
