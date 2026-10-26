@@ -31,9 +31,12 @@ export function sanitizeArticleHtml(dirty: string): string {
     transformTags: {
       a: (tagName, attribs) => {
         const href = attribs.href ?? "";
-        return /^https?:\/\//i.test(href)
-          ? { tagName, attribs: { href, target: "_blank", rel: "noopener noreferrer nofollow" } }
-          : { tagName, attribs: { href } };
+        const safe: Record<string, string> = { href };
+        if (/^https?:\/\//i.test(href)) {
+          safe.target = "_blank";
+          safe.rel = "noopener noreferrer nofollow";
+        }
+        return { tagName, attribs: safe };
       },
     },
     exclusiveFilter: (frame) => frame.tag === "img" && !ARTICLE_IMAGE_URL.test(frame.attribs.src ?? ""),
