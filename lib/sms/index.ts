@@ -7,7 +7,12 @@ import type { SmsProvider } from "./types";
 function createProvider(): SmsProvider {
   if (env.SMS_PROVIDER === "kavenegar") {
     // وجود کلید/قالب در lib/env.ts اعتبارسنجی می‌شود.
-    return createKavenegarSms(env.SMS_API_KEY ?? "", env.SMS_OTP_TEMPLATE ?? "");
+    return createKavenegarSms({
+      apiKey: env.SMS_API_KEY ?? "",
+      method: env.SMS_KAVENEGAR_METHOD,
+      template: env.SMS_OTP_TEMPLATE ?? "",
+      sender: env.SMS_SENDER,
+    });
   }
 
   // `next build` همیشه NODE_ENV=production می‌گذارد؛ پس این محافظ هنگام «ارسال» اجرا می‌شود نه هنگام بارگذاری env.

@@ -20,19 +20,38 @@ export class KavenegarError extends Error {
   }
 }
 
+export type KavenegarConfig = {
+  apiKey: string;
+  /** lookup: قالب تأییدشده (نیازمند سرویس پیشرفته)؛ send: پیامک ساده با متن مستقیم */
+  method: "lookup" | "send";
+  template: string;
+  /** فقط برای send؛ خالی = خط پیش‌فرض حساب */
+  sender?: string | undefined;
+};
+
+/** متن پیامک در حالت send (پیامک ساده). */
+export function otpMessage(code: string): string {
+  return `کد ورود شما به بانک ابزار: ${code}`;
+}
+
 /**
- * کاوه‌نگار — متد Verify Lookup (قالب تأییدشده در پنل، توکن = کد OTP).
- * مستقیم با REST (`/v1/{apikey}/verify/lookup.json`) صدا زده می‌شود؛ پکیج npm `kavenegar` فقط پوشش callback-محور
- * روی همین آدرس است و وابستگی اضافه می‌آورد، پس استفاده نشده.
- * ⚠️ با پنل و قالب واقعی هنوز تست نشده؛ قبل از production یک پیامک واقعی بفرست.
+ * کاوه‌نگار — مستقیم با REST صدا زده می‌شود (پکیج npm `kavenegar` فقط پوشش callback-محور روی همین آدرس است).
+ * - lookup: `/verify/lookup.json` با قالب تأییدشده؛ در حساب‌های بدون «سرویس پیشرفته» خطای ۴۲۶ می‌دهد.
+ * - send: `/sms/send.json` با متن مستقیم (حساب رایگان).
+ * کلید ناگزیر در مسیر URL است (طراحی کاوه‌نگار)؛ شماره/کد/متن در بدنه‌ی POST می‌روند.
+ * ⚠️ حالت send با حساب واقعی هنوز تست نشده.
  */
-export function createKavenegarSms(apiKey: string, template: string): SmsProvider {
+export function createKavenegarSms(config: KavenegarConfig): SmsProvider {
   return {
     async sendOtp(phone, code) {
-      const url = new URL(`https://api.kavenegar.com/v1/${encodeURIComponent(apiKey)}/verify/lookup.json`);
+      const path = config.method === "lookup" ? "verify/lookup.json" : "sms/send.json";
+      const url = new URL(`https://api.kavenegar.com/v1/${encodeURIComponent(config.apiKey)}/${path}`);
 
-      // POST با بدنه‌ی فرم: شماره و کد در URL (و لاگ‌های پراکسی) نمی‌مانند. کلید ناگزیر در مسیر است (طراحی کاوه‌نگار).
-      const body = new URLSearchParams({ receptor: phone, token: code, template });
+      const body =
+        config.method === "lookup"
+          ? new URLSearchParams({ receptor: phone, token: code, template: config.template })
+          : new URLSearchParams({ receptor: phone, message: otpMessage(code) });
+      if (config.method === "send" && config.sender) body.set("sender", config.sender);
 
       const response = await fetch(url, {
         method: "POST",

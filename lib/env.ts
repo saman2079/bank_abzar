@@ -19,6 +19,10 @@ const envSchema = z
     SMS_PROVIDER: z.enum(["console", "kavenegar"]).default("console"),
     SMS_API_KEY: z.string().min(1).optional(),
     SMS_OTP_TEMPLATE: z.string().min(1).optional(),
+    // lookup = قالب تأییدشده (نیازمند «سرویس پیشرفته» کاوه‌نگار)؛ send = پیامک ساده با متن مستقیم (حساب رایگان)
+    SMS_KAVENEGAR_METHOD: z.enum(["lookup", "send"]).default("lookup"),
+    // خط ارسال‌کننده؛ اگر خالی باشد خط پیش‌فرض حساب استفاده می‌شود (فقط برای method=send)
+    SMS_SENDER: z.string().min(1).optional(),
 
     // فاز ۵
     ZARINPAL_MERCHANT_ID: z.string().length(36).optional(),
@@ -34,7 +38,8 @@ const envSchema = z
   .superRefine((value, ctx) => {
     if (value.SMS_PROVIDER === "kavenegar") {
       if (!value.SMS_API_KEY) ctx.addIssue({ code: "custom", path: ["SMS_API_KEY"], message: "required" });
-      if (!value.SMS_OTP_TEMPLATE) ctx.addIssue({ code: "custom", path: ["SMS_OTP_TEMPLATE"], message: "required" });
+      if (value.SMS_KAVENEGAR_METHOD === "lookup" && !value.SMS_OTP_TEMPLATE)
+        ctx.addIssue({ code: "custom", path: ["SMS_OTP_TEMPLATE"], message: "required" });
     }
     if (value.STORAGE_DRIVER === "blob" && !value.BLOB_READ_WRITE_TOKEN) {
       ctx.addIssue({ code: "custom", path: ["BLOB_READ_WRITE_TOKEN"], message: "required" });
