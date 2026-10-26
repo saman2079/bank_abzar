@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Suspense, createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { loginUrl } from "@/modules/auth/redirect";
 import { toggleFavoriteAction } from "@/modules/wishlist/actions";
@@ -21,21 +21,18 @@ type WishlistResponse = { authenticated: boolean; ids: string[] };
  */
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
   const [ids, setIds] = useState<ReadonlySet<string>>(new Set());
   const [pendingId, setPendingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    fetch("/api/wishlist", { signal: controller.signal, cache: "no-store" })
-      .then((response) => (response.ok ? (response.json() as Promise<WishlistResponse>) : null))
-      .then((data) => setIds(new Set(data?.ids ?? [])))
-      .catch(() => undefined);
-
-    // با تغییر مسیر هم تازه می‌شود تا بعد از ورود/خروج یا تغییر در صفحه‌ی دیگر قلب‌ها درست بمانند.
-    return () => controller.abort();
-  }, [pathname]);
+  const refresh = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const response = await fetch("/api/wishlist", { signal, cache: "no-store" });
+      const data = response.ok ? ((await response.json()) as WishlistResponse) : null;
+      setIds(new Set(data?.ids ?? []));
+    } catch {
+      // قطع شبکه یا لغو: وضعیت قبلی می‌ماند.
+    }
+  }, []);
 
   const toggle = useCallback(
     async (productId: string): Promise<string | null> => {
@@ -79,7 +76,28 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     [ids, toggle, pendingId],
   );
 
-  return <FavoritesContext value={value}>{children}</FavoritesContext>;
+  return (
+    <FavoritesContext value={value}>
+      {/* usePathname داینامیک است و باید داخل Suspense باشد (وگرنه prerender کل لی‌اوت می‌شکند). */}
+      <Suspense fallback={null}>
+        <RefreshOnNavigation refresh={refresh} />
+      </Suspense>
+      {children}
+    </FavoritesContext>
+  );
+}
+
+/** با هر تغییر مسیر (و بعد از ورود/خروج) قلب‌ها را از سرور تازه می‌کند. */
+function RefreshOnNavigation({ refresh }: { refresh: (signal?: AbortSignal) => Promise<void> }) {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void refresh(controller.signal);
+    return () => controller.abort();
+  }, [pathname, refresh]);
+
+  return null;
 }
 
 export function useFavorites(): FavoritesContextValue {
