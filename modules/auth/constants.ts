@@ -1,10 +1,9 @@
 export const ROLES = ["CUSTOMER", "STAFF", "ADMIN"] as const;
 export type Role = (typeof ROLES)[number];
 
-export const OTP_LENGTH = 6;
-export const OTP_TTL_SECONDS = 120;
-export const OTP_MAX_ATTEMPTS = 5;
-export const OTP_RESEND_SECONDS = 60;
+/** حداقل طول طبق توصیه‌ی NIST SP 800-63B (طول مهم‌تر از قواعد ترکیبی است)؛ سقف برای جلوگیری از سوءاستفاده‌ی هش سنگین. */
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 128;
 
 export const CUSTOMER_SESSION_SECONDS = 60 * 60 * 24 * 30;
 export const STAFF_SESSION_SECONDS = 60 * 60 * 12;

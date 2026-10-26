@@ -13,11 +13,8 @@ const envSchema = z
     // فاز ۲
     DATABASE_URL: z.string().min(1),
 
-    // فاز ۳
+    // فاز ۳ — SESSION_SECRET (حداقل ۳۲ کاراکتر)
     SESSION_SECRET: z.string().min(32),
-    SMS_PROVIDER: z.enum(["console", "kavenegar"]).default("console"),
-    SMS_API_KEY: z.string().min(1).optional(),
-    SMS_SENDER: z.string().min(1).optional(),
 
     // فاز ۵
     ZARINPAL_MERCHANT_ID: z.string().length(36).optional(),
@@ -31,14 +28,6 @@ const envSchema = z
     BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.SMS_PROVIDER === "kavenegar" && !value.SMS_API_KEY) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["SMS_API_KEY"],
-        message: "required",
-      });
-    }
-
     if (value.STORAGE_DRIVER === "blob" && !value.BLOB_READ_WRITE_TOKEN) {
       ctx.addIssue({
         code: "custom",

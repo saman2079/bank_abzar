@@ -17,7 +17,7 @@ export type ManualOrderResult = { ok: true; orderId: string } | { ok: false; err
  * (همان شرط `stock >= n AND price = دیده‌شده` و قفل به ترتیب productId مثل `placeOrder`)،
  * و سفارش با `createdById = ادمین` ثبت می‌شود.
  * - «پرداخت‌شده» → PAID بدون مهلت (توضیح پرداخت اجباری است).
- * - «در انتظار پرداخت» → PENDING_PAYMENT با مهلت؛ مشتری با ورود OTP می‌تواند آنلاین بپردازد.
+ * - «در انتظار پرداخت» → PENDING_PAYMENT با مهلت؛ مشتری با ورود می‌تواند آنلاین بپردازد.
  */
 export async function createManualOrder(actor: SessionUser, input: ManualOrderInput): Promise<ManualOrderResult> {
   if (input.paid && (!input.paymentNote || input.paymentNote.length < 3)) {

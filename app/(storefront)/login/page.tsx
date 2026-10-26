@@ -23,7 +23,7 @@ async function LoginContent({ searchParams }: { searchParams: SearchParams }) {
     <Card className="space-y-6 p-6">
       <div className="space-y-1">
         <h1 className="text-xl font-extrabold">ورود یا ثبت‌نام</h1>
-        <p className="text-muted text-sm">فقط با شماره موبایل؛ بدون نیاز به رمز عبور.</p>
+        <p className="text-muted text-sm">با شماره موبایل و رمز عبور وارد شوید یا حساب جدید بسازید.</p>
       </div>
       <LoginForm next={target} />
     </Card>
