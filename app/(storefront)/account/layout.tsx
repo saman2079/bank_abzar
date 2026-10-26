@@ -14,8 +14,8 @@ async function AccountShell({ children }: { children: React.ReactNode }) {
   const initial = (user.name?.trim() || "؟").charAt(0);
 
   return (
-    <div className="grid gap-5 md:grid-cols-[250px_minmax(0,1fr)] md:gap-8">
-      <aside className="space-y-4 md:sticky md:top-24 md:self-start">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-[250px_minmax(0,1fr)] md:gap-8">
+      <aside className="min-w-0 space-y-4 md:sticky md:top-24 md:self-start">
         <div className="border-border bg-surface rounded-card flex items-center gap-3 border p-4">
           <span
             aria-hidden

@@ -12,14 +12,14 @@ const links = [
   { href: "/account/addresses", label: "آدرس‌ها", Icon: MapPin, exact: false },
 ] as const;
 
-/** موبایل: نوار افقی قابل‌اسکرول؛ دسکتاپ: منوی عمودی. آیتم فعال با زرد مشخص است. */
+/** موبایل: شبکه‌ی ۲×۲ (بدون اسکرول افقی)؛ دسکتاپ: منوی عمودی. آیتم فعال با زرد مشخص است. */
 export function AccountNav() {
   const pathname = usePathname();
 
   return (
     <nav
       aria-label="منوی حساب"
-      className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden"
+      className="grid grid-cols-2 gap-2 md:flex md:flex-col md:gap-1"
     >
       {links.map(({ href, label, Icon, exact }) => {
         const active = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
@@ -30,7 +30,7 @@ export function AccountNav() {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors md:rounded-xl md:py-2.5",
+              "flex items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-bold transition-colors md:justify-start md:rounded-xl md:px-4",
               active
                 ? "bg-primary text-primary-fg"
                 : "border-border bg-surface text-muted hover:text-fg hover:border-primary/60 border md:border-transparent md:bg-transparent",
