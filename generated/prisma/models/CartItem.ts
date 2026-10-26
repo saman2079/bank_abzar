@@ -14,7 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model CartItem
- * سبد کاربر لاگین‌شده. سبد مهمان در کوکی است و هنگام ورود merge می‌شود.
+ * 
  */
 export type CartItemModel = runtime.Types.Result.DefaultSelection<Prisma.$CartItemPayload>
 

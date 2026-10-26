@@ -60,3 +60,21 @@ export const PaymentStatus = {
 } as const
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
+export const InvoiceStatus = {
+  PROFORMA: 'PROFORMA',
+  FINAL: 'FINAL',
+  CANCELED: 'CANCELED'
+} as const
+
+export type InvoiceStatus = (typeof InvoiceStatus)[keyof typeof InvoiceStatus]
+
+
+export const ArticleStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type ArticleStatus = (typeof ArticleStatus)[keyof typeof ArticleStatus]

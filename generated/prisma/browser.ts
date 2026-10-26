@@ -63,8 +63,14 @@ export type Address = Prisma.AddressModel
  */
 export type RateLimit = Prisma.RateLimitModel
 /**
- * Model CartItem
+ * Model WishlistItem
  * سبد کاربر لاگین‌شده. سبد مهمان در کوکی است و هنگام ورود merge می‌شود.
+ * علاقه‌مندی‌های کاربر (فقط کاربر واردشده)
+ */
+export type WishlistItem = Prisma.WishlistItemModel
+/**
+ * Model CartItem
+ * 
  */
 export type CartItem = Prisma.CartItemModel
 /**
@@ -102,3 +108,23 @@ export type AuditLog = Prisma.AuditLogModel
  * تنظیمات فروشگاه (کلید → JSON). فعلاً: `shipping` (هزینه ارسال). فقط ادمین تغییر می‌دهد.
  */
 export type Setting = Prisma.SettingModel
+/**
+ * Model Invoice
+ * پیش‌فاکتور (بدون اثر روی انبار) → فاکتور قطعی (کسر اتمیک موجودی) یا باطل. مستقل از Order فروشگاه آنلاین.
+ */
+export type Invoice = Prisma.InvoiceModel
+/**
+ * Model InvoiceItem
+ * 
+ */
+export type InvoiceItem = Prisma.InvoiceItemModel
+/**
+ * Model Article
+ * مقاله‌ی وبلاگ (سئو). فقط `contentHtml` به‌صورت عمومی رندر می‌شود و همیشه قبل از ذخیره sanitize شده است.
+ */
+export type Article = Prisma.ArticleModel
+/**
+ * Model ArticleSlugHistory
+ * نامک‌های قبلی مقاله؛ برای ریدایرکت ۳۰۱ بعد از تغییر slug
+ */
+export type ArticleSlugHistory = Prisma.ArticleSlugHistoryModel

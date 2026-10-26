@@ -60,6 +60,7 @@ export const ModelName = {
   Session: 'Session',
   Address: 'Address',
   RateLimit: 'RateLimit',
+  WishlistItem: 'WishlistItem',
   CartItem: 'CartItem',
   Order: 'Order',
   OrderItem: 'OrderItem',
@@ -67,7 +68,11 @@ export const ModelName = {
   StockMovement: 'StockMovement',
   Payment: 'Payment',
   AuditLog: 'AuditLog',
-  Setting: 'Setting'
+  Setting: 'Setting',
+  Invoice: 'Invoice',
+  InvoiceItem: 'InvoiceItem',
+  Article: 'Article',
+  ArticleSlugHistory: 'ArticleSlugHistory'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -226,6 +231,16 @@ export const RateLimitScalarFieldEnum = {
 export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]
 
 
+export const WishlistItemScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  createdAt: 'createdAt'
+} as const
+
+export type WishlistItemScalarFieldEnum = (typeof WishlistItemScalarFieldEnum)[keyof typeof WishlistItemScalarFieldEnum]
+
+
 export const CartItemScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -290,6 +305,7 @@ export const StockMovementScalarFieldEnum = {
   delta: 'delta',
   type: 'type',
   orderId: 'orderId',
+  invoiceId: 'invoiceId',
   userId: 'userId',
   note: 'note',
   createdAt: 'createdAt'
@@ -340,6 +356,81 @@ export const SettingScalarFieldEnum = {
 } as const
 
 export type SettingScalarFieldEnum = (typeof SettingScalarFieldEnum)[keyof typeof SettingScalarFieldEnum]
+
+
+export const InvoiceScalarFieldEnum = {
+  id: 'id',
+  number: 'number',
+  status: 'status',
+  customerName: 'customerName',
+  customerPhone: 'customerPhone',
+  customerAddress: 'customerAddress',
+  subtotal: 'subtotal',
+  discount: 'discount',
+  taxPercent: 'taxPercent',
+  taxAmount: 'taxAmount',
+  shippingCost: 'shippingCost',
+  total: 'total',
+  note: 'note',
+  paymentNote: 'paymentNote',
+  validUntil: 'validUntil',
+  createdById: 'createdById',
+  finalizedAt: 'finalizedAt',
+  finalizedById: 'finalizedById',
+  canceledAt: 'canceledAt',
+  canceledById: 'canceledById',
+  cancelReason: 'cancelReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]
+
+
+export const InvoiceItemScalarFieldEnum = {
+  id: 'id',
+  invoiceId: 'invoiceId',
+  productId: 'productId',
+  nameSnapshot: 'nameSnapshot',
+  skuSnapshot: 'skuSnapshot',
+  unitPrice: 'unitPrice',
+  quantity: 'quantity',
+  discount: 'discount'
+} as const
+
+export type InvoiceItemScalarFieldEnum = (typeof InvoiceItemScalarFieldEnum)[keyof typeof InvoiceItemScalarFieldEnum]
+
+
+export const ArticleScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  excerpt: 'excerpt',
+  contentHtml: 'contentHtml',
+  contentJson: 'contentJson',
+  coverUrl: 'coverUrl',
+  coverAlt: 'coverAlt',
+  status: 'status',
+  publishedAt: 'publishedAt',
+  readingMinutes: 'readingMinutes',
+  seoTitle: 'seoTitle',
+  seoDescription: 'seoDescription',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ArticleScalarFieldEnum = (typeof ArticleScalarFieldEnum)[keyof typeof ArticleScalarFieldEnum]
+
+
+export const ArticleSlugHistoryScalarFieldEnum = {
+  id: 'id',
+  articleId: 'articleId',
+  slug: 'slug',
+  createdAt: 'createdAt'
+} as const
+
+export type ArticleSlugHistoryScalarFieldEnum = (typeof ArticleSlugHistoryScalarFieldEnum)[keyof typeof ArticleSlugHistoryScalarFieldEnum]
 
 
 export const SortOrder = {
