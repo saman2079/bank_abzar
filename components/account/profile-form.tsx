@@ -12,7 +12,7 @@ export function ProfileForm({ phone, name, email }: ProfileFormProps) {
   const [state, action] = useActionState(updateProfileAction, {});
 
   return (
-    <form action={action} className="max-w-md space-y-4">
+    <form action={action} className="space-y-4">
       <Field label="شماره موبایل" htmlFor="profile-phone" hint="شماره‌ی ثبت‌نام قابل تغییر نیست.">
         <Input id="profile-phone" value={phone} dir="ltr" readOnly disabled />
       </Field>

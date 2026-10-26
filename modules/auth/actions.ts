@@ -14,6 +14,11 @@ import { adminLoginSchema, loginSchema, registerSchema } from "./schemas";
 import { registerCustomer } from "./service";
 import type { FormState } from "./types";
 
+/** خطا را برمی‌گرداند و شماره را نگه می‌دارد تا فیلد بعد از خطا خالی نشود. */
+function fail(formData: FormData, error: string): FormState {
+  return { error, phone: formString(formData, "phone") };
+}
+
 function firstIssue(error: { issues: { message: string }[] }): string {
   return error.issues[0]?.message ?? "ورودی نامعتبر است.";
 }
@@ -40,7 +45,7 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
     password: formString(formData, "password"),
     next: formString(formData, "next") || undefined,
   });
-  if (!parsed.success) return { error: firstIssue(parsed.error) };
+  if (!parsed.success) return fail(formData, firstIssue(parsed.error));
 
   const { phone, password, next } = parsed.data;
   const { ip } = await getRequestMeta();
@@ -49,7 +54,7 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
     rateLimit(`login:ip:${ip}`, 20, 900),
     rateLimit(`login:phone:${phone}`, 8, 900),
   ]);
-  if (!byIp.ok || !byPhone.ok) return { error: TOO_MANY };
+  if (!byIp.ok || !byPhone.ok) return fail(formData, TOO_MANY);
 
   // فقط مشتری؛ ادمین/استاف از /admin/login وارد می‌شوند.
   const user = await db.user.findFirst({
@@ -58,7 +63,7 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
   });
 
   const valid = await verifyPassword(user?.passwordHash ?? null, password);
-  if (!user || !valid) return { error: LOGIN_ERROR };
+  if (!user || !valid) return fail(formData, LOGIN_ERROR);
 
   return startCustomerSession(user, next);
 }
@@ -75,7 +80,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     confirm: formString(formData, "confirm"),
     next: formString(formData, "next") || undefined,
   });
-  if (!parsed.success) return { error: firstIssue(parsed.error) };
+  if (!parsed.success) return fail(formData, firstIssue(parsed.error));
 
   const { phone, password, next } = parsed.data;
   const { ip } = await getRequestMeta();
@@ -84,10 +89,10 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     rateLimit(`register:ip:${ip}`, 10, 3600),
     rateLimit(`register:phone:${phone}`, 5, 3600),
   ]);
-  if (!byIp.ok || !byPhone.ok) return { error: "تعداد درخواست‌ها زیاد است؛ بعداً دوباره تلاش کنید." };
+  if (!byIp.ok || !byPhone.ok) return fail(formData, "تعداد درخواست‌ها زیاد است؛ بعداً دوباره تلاش کنید.");
 
   const result = await registerCustomer(phone, await hashPassword(password));
-  if (!result.ok) return { error: REGISTER_ERRORS[result.reason] };
+  if (!result.ok) return fail(formData, REGISTER_ERRORS[result.reason]);
 
   return startCustomerSession(result.user, next);
 }
@@ -104,7 +109,7 @@ export async function adminLoginAction(_prev: FormState, formData: FormData): Pr
     phone: formString(formData, "phone"),
     password: formString(formData, "password"),
   });
-  if (!parsed.success) return { error: firstIssue(parsed.error) };
+  if (!parsed.success) return fail(formData, firstIssue(parsed.error));
 
   const { phone, password } = parsed.data;
   const { ip } = await getRequestMeta();
@@ -113,7 +118,7 @@ export async function adminLoginAction(_prev: FormState, formData: FormData): Pr
     rateLimit(`admin:login:ip:${ip}`, 10, 900),
     rateLimit(`admin:login:phone:${phone}`, 5, 900),
   ]);
-  if (!byIp.ok || !byPhone.ok) return { error: "تلاش‌های ناموفق زیاد است؛ ۱۵ دقیقه بعد دوباره امتحان کنید." };
+  if (!byIp.ok || !byPhone.ok) return fail(formData, "تلاش‌های ناموفق زیاد است؛ ۱۵ دقیقه بعد دوباره امتحان کنید.");
 
   const user = await db.user.findFirst({
     where: { phone, role: { in: ["ADMIN", "STAFF"] }, isActive: true },
@@ -121,7 +126,7 @@ export async function adminLoginAction(_prev: FormState, formData: FormData): Pr
   });
 
   const valid = await verifyPassword(user?.passwordHash ?? null, password);
-  if (!user || !valid) return { error: ADMIN_LOGIN_ERROR };
+  if (!user || !valid) return fail(formData, ADMIN_LOGIN_ERROR);
 
   await createSession(user.id, user.role);
   redirect("/admin");

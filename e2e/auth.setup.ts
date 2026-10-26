@@ -18,7 +18,7 @@ setup("ورود ادمین", async ({ page }) => {
 
   await page.goto("/admin/login");
   await page.getByLabel("شماره موبایل").fill(phone);
-  await page.getByLabel("رمز عبور").fill(password);
+  await page.getByLabel("رمز عبور", { exact: true }).fill(password);
   await page.getByRole("button", { name: "ورود به پنل" }).click();
 
   await expect(page).toHaveURL(/\/admin$/);

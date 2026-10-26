@@ -114,7 +114,7 @@ test.describe("دسترسی ناشناس (ضد دور زدن احراز هویت
   test("ورود ادمین با رمز اشتباه خطای عمومی می‌دهد", async ({ page }) => {
     await page.goto("/admin/login");
     await page.getByLabel("شماره موبایل").fill("09129999999");
-    await page.getByLabel("رمز عبور").fill("wrong-password-123");
+    await page.getByLabel("رمز عبور", { exact: true }).fill("wrong-password-123");
     await page.getByRole("button", { name: "ورود به پنل" }).click();
     await expect(page.getByText("شماره یا رمز عبور اشتباه است.")).toBeVisible();
   });

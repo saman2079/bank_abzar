@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { Field, FormMessage } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { loginAction, registerAction } from "@/modules/auth/actions";
 import { PASSWORD_MIN_LENGTH } from "@/modules/auth/constants";
@@ -10,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 type Mode = "login" | "register";
 
-function PhoneField({ id }: { id: string }) {
+function PhoneField({ id, defaultValue }: { id: string; defaultValue?: string }) {
   return (
     <Field label="شماره موبایل" htmlFor={id}>
       <Input
@@ -21,6 +22,7 @@ function PhoneField({ id }: { id: string }) {
         autoComplete="tel"
         dir="ltr"
         placeholder="09123456789"
+        defaultValue={defaultValue}
         required
       />
     </Field>
@@ -33,9 +35,9 @@ function LoginPanel({ next }: { next?: string }) {
   return (
     <form action={action} className="space-y-4">
       {next ? <input type="hidden" name="next" value={next} /> : null}
-      <PhoneField id="login-phone" />
+      <PhoneField id="login-phone" defaultValue={state.phone} />
       <Field label="رمز عبور" htmlFor="login-password">
-        <Input id="login-password" name="password" type="password" autoComplete="current-password" dir="ltr" required />
+        <PasswordInput id="login-password" name="password" autoComplete="current-password" required />
       </Field>
       <FormMessage error={state.error} />
       <SubmitButton className="w-full" pendingLabel="در حال ورود…">
@@ -51,20 +53,18 @@ function RegisterPanel({ next }: { next?: string }) {
   return (
     <form action={action} className="space-y-4">
       {next ? <input type="hidden" name="next" value={next} /> : null}
-      <PhoneField id="register-phone" />
+      <PhoneField id="register-phone" defaultValue={state.phone} />
       <Field label="رمز عبور" htmlFor="register-password" hint={`حداقل ${PASSWORD_MIN_LENGTH} کاراکتر`}>
-        <Input
+        <PasswordInput
           id="register-password"
           name="password"
-          type="password"
           autoComplete="new-password"
           minLength={PASSWORD_MIN_LENGTH}
-          dir="ltr"
           required
         />
       </Field>
       <Field label="تکرار رمز عبور" htmlFor="register-confirm">
-        <Input id="register-confirm" name="confirm" type="password" autoComplete="new-password" dir="ltr" required />
+        <PasswordInput id="register-confirm" name="confirm" autoComplete="new-password" required />
       </Field>
       <FormMessage error={state.error} />
       <SubmitButton className="w-full" pendingLabel="در حال ثبت‌نام…">
