@@ -59,7 +59,7 @@ async function main() {
 
   try {
     const results = await Promise.all(
-      users.map((user) => placeOrder(user.id, { addressId: user.addresses[0]?.id ?? "", note: null })),
+      users.map((user) => placeOrder(user.id, { addressId: user.addresses[0]?.id ?? "", note: null, paymentMethod: "ONLINE" })),
     );
     const winners = results.filter((result) => result.ok);
     check("دقیقاً یک سفارش موفق شد", winners.length === 1);
