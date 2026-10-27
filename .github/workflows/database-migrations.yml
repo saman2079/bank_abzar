@@ -1,0 +1,76 @@
+name: Database Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Operation to perform"
+        required: true
+        type: choice
+        options:
+          - status
+          - deploy
+        default: status
+      confirm_production:
+        description: "Must be yes to apply migrations to production"
+        required: true
+        type: choice
+        options:
+          - no
+          - yes
+        default: no
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-database-migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Prisma migration ${{ inputs.action }} (production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Configure this GitHub Environment with DATABASE_URL and required reviewers.
+    # The job pauses for environment approval when reviewers are configured.
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Require explicit production confirmation
+        if: ${{ inputs.action == 'deploy' && inputs.confirm_production != 'yes' }}
+        run: |
+          echo "::error::Production migration requires confirm_production=yes."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Validate database secret
+        shell: bash
+        run: |
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "::error::Configure DATABASE_URL in the GitHub production Environment secrets."
+            exit 1
+          fi
+
+      - name: Install dependencies and generate Prisma Client
+        run: npm ci
+
+      - name: Check migration status before changes
+        run: npm run db:status
+
+      - name: Apply committed migrations to production
+        if: ${{ inputs.action == 'deploy' && inputs.confirm_production == 'yes' }}
+        run: npm run db:deploy
+
+      - name: Verify migration status after operation
+        if: ${{ always() }}
+        run: npm run db:status
