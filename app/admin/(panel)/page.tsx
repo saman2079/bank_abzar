@@ -45,6 +45,12 @@ export default async function AdminDashboardPage() {
           href="/admin/orders?status=PAID"
           alert={data.awaitingProcessing > 0}
         />
+        <Stat
+          label="پرداخت در محل، منتظر تماس"
+          value={formatNumber(data.pendingConfirmation)}
+          href="/admin/orders?status=PENDING_CONFIRMATION"
+          alert={data.pendingConfirmation > 0}
+        />
         <Stat label="در انتظار پرداخت" value={formatNumber(data.pendingPayment)} href="/admin/orders?status=PENDING_PAYMENT" />
         <Stat label="نیازمند بازگشت وجه" value={formatNumber(data.refunds)} alert={data.refunds > 0} />
         <Stat label="کم‌موجودی" value={formatNumber(data.lowStock.length)} href="/admin/inventory" alert={data.lowStock.length > 0} />

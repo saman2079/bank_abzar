@@ -54,3 +54,5 @@
 `.env.example` — فهرست متغیرهای محیطی (کپی به `.env.local`؛ همان نام‌ها در Vercel).
 
 `components/ui/password-input.tsx` (فیلد رمز با چشم) · `components/account/account-nav.tsx` (منوی حساب؛ ریسپانسیو).
+
+`modules/orders/cod.ts` — قانون پرداخت در محل (`isCodEligible`: فقط تهران)؛ ثابت‌های COD در `modules/orders/constants.ts`.

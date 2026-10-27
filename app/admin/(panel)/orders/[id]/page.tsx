@@ -7,7 +7,7 @@ import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { Card } from "@/components/ui/card";
 import { requireStaff } from "@/lib/dal";
 import { formatDateTime, formatNumber, formatToman } from "@/lib/format";
-import { ORDER_STATUS_LABELS, formatOrderNumber } from "@/modules/orders/constants";
+import { ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS, formatOrderNumber } from "@/modules/orders/constants";
 import { getAdminOrder } from "@/modules/orders/admin/queries";
 import { ADMIN_TRANSITIONS } from "@/modules/orders/admin/transitions";
 
@@ -28,6 +28,31 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
         <PageHeader title={`سفارش ${formatNumber(Number(formatOrderNumber(order.number)))}`} />
         <OrderStatusBadge status={order.status} />
       </div>
+
+      {order.status === "PENDING_CONFIRMATION" ? (
+        <Card className="border-primary/50 space-y-2 p-5 text-sm leading-7">
+          <p className="font-bold">پرداخت در محل — منتظر تماس تلفنی</p>
+          <p>
+            با مشتری تماس بگیرید و واقعی‌بودن سفارش را بررسی کنید:{" "}
+            <a href={`tel:${order.address?.receiverPhone ?? order.user.phone}`} className="text-primary font-bold" dir="ltr">
+              {order.address?.receiverPhone ?? order.user.phone}
+            </a>
+            {order.address && order.address.receiverPhone !== order.user.phone ? (
+              <>
+                {" "}
+                (شماره‌ی حساب:{" "}
+                <a href={`tel:${order.user.phone}`} className="text-primary" dir="ltr">
+                  {order.user.phone}
+                </a>
+                )
+              </>
+            ) : null}
+            . اگر تأیید شد وضعیت را «{ORDER_STATUS_LABELS.PROCESSING}» کنید؛ در غیر این صورت «{ORDER_STATUS_LABELS.CANCELED}» (موجودی برمی‌گردد).
+            نتیجه‌ی تماس را در «توضیح» بنویسید تا در تاریخچه بماند.
+            {order.expiresAt ? ` مهلت: ${formatDateTime(order.expiresAt)} (بعد از آن خودکار لغو می‌شود).` : ""}
+          </p>
+        </Card>
+      ) : null}
 
       {needsRefund ? (
         <Card role="alert" className="border-danger/50 text-danger p-4 text-sm">
@@ -63,6 +88,10 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                 <dt className="text-muted">ارسال</dt>
                 <dd>{order.shippingCost === 0 ? "رایگان" : formatToman(order.shippingCost)}</dd>
               </div>
+              <div className="flex justify-between">
+                <dt className="text-muted">روش پرداخت</dt>
+                <dd>{PAYMENT_METHOD_LABELS[order.paymentMethod]}</dd>
+              </div>
               <div className="flex justify-between text-base font-extrabold">
                 <dt>مبلغ کل</dt>
                 <dd>{formatToman(order.total)}</dd>
@@ -95,7 +124,9 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
           <Card className="space-y-3 p-5 text-sm">
             <h2 className="font-bold">پرداخت‌ها</h2>
             {order.payments.length === 0 ? (
-              <p className="text-muted">پرداخت آنلاینی ثبت نشده است.</p>
+              <p className="text-muted">
+                {order.paymentMethod === "COD" ? "پرداخت در محل؛ مبلغ هنگام تحویل از مشتری دریافت می‌شود." : "پرداخت آنلاینی ثبت نشده است."}
+              </p>
             ) : (
               <ul className="divide-border divide-y">
                 {order.payments.map((payment) => (

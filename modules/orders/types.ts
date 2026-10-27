@@ -1,5 +1,5 @@
 import type { AddressSnapshot } from "./schemas";
-import type { OrderStatus } from "./constants";
+import type { OrderStatus, PaymentMethod } from "./constants";
 
 export type OrderListItem = {
   id: string;
@@ -14,6 +14,7 @@ export type OrderDetail = {
   id: string;
   number: number;
   status: OrderStatus;
+  paymentMethod: PaymentMethod;
   subtotal: number;
   shippingCost: number;
   discount: number;

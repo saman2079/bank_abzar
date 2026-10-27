@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { requireUser } from "@/lib/dal";
 import { formatDateTime, formatNumber, formatToman } from "@/lib/format";
 import { cancelMyOrderAction } from "@/modules/orders/actions";
-import { formatOrderNumber } from "@/modules/orders/constants";
+import { PAYMENT_METHOD_LABELS, formatOrderNumber } from "@/modules/orders/constants";
 import { getMyOrder } from "@/modules/orders/queries";
 
 export const metadata: Metadata = { title: "جزئیات سفارش" };
@@ -73,6 +73,23 @@ export default async function OrderPage({
         </Card>
       ) : null}
 
+      {order.status === "PENDING_CONFIRMATION" ? (
+        <Card className="border-primary/50 space-y-3 p-5">
+          <p className="text-sm leading-7">
+            سفارش شما ثبت شد و در انتظار تأیید تلفنی است. همکاران ما به‌زودی با شماره{" "}
+            <bdi dir="ltr">{order.address?.receiverPhone ?? user.phone}</bdi> تماس می‌گیرند. پس از تأیید، سفارش آماده‌سازی می‌شود و
+            مبلغ را هنگام تحویل می‌پردازید.
+            {order.expiresAt ? ` در صورت عدم تأیید تا ${formatDateTime(order.expiresAt)}، سفارش خودکار لغو می‌شود.` : ""}
+          </p>
+          <form action={cancelMyOrderAction}>
+            <input type="hidden" name="id" value={order.id} />
+            <Button type="submit" variant="outline">
+              لغو سفارش
+            </Button>
+          </form>
+        </Card>
+      ) : null}
+
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
           <Card className="space-y-3 p-5">
@@ -96,8 +113,12 @@ export default async function OrderPage({
                 <dt className="text-muted">هزینه ارسال</dt>
                 <dd>{order.shippingCost === 0 ? "رایگان" : formatToman(order.shippingCost)}</dd>
               </div>
+              <div className="flex justify-between">
+                <dt className="text-muted">روش پرداخت</dt>
+                <dd>{PAYMENT_METHOD_LABELS[order.paymentMethod]}</dd>
+              </div>
               <div className="flex justify-between text-base font-extrabold">
-                <dt>مبلغ کل</dt>
+                <dt>{order.paymentMethod === "COD" ? "مبلغ قابل پرداخت هنگام تحویل" : "مبلغ کل"}</dt>
                 <dd>{formatToman(order.total)}</dd>
               </div>
             </dl>

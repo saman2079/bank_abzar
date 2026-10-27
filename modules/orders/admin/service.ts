@@ -28,7 +28,7 @@ export async function changeOrderStatus(
     return { ok: false, error: "برای این تغییر، توضیح/دلیل (حداقل ۳ کاراکتر) لازم است." };
   }
 
-  if (order.status === "PENDING_PAYMENT" && input.to === "CANCELED") {
+  if ((order.status === "PENDING_PAYMENT" || order.status === "PENDING_CONFIRMATION") && input.to === "CANCELED") {
     const canceled = await cancelPendingOrder(order.id, { actorId: actor.id, note: input.note ?? "لغو توسط مدیر" });
     if (!canceled) return { ok: false, error: "وضعیت سفارش همزمان تغییر کرد؛ صفحه را تازه کنید." };
 
@@ -45,7 +45,10 @@ export async function changeOrderStatus(
   return db.$transaction(async (tx) => {
     const moved = await tx.order.updateMany({
       where: { id: order.id, status: order.status },
-      data: { status: input.to, ...(input.to === "PAID" ? { expiresAt: null } : {}) },
+      data: {
+        status: input.to,
+        ...(input.to === "PAID" || order.status === "PENDING_CONFIRMATION" ? { expiresAt: null } : {}),
+      },
     });
     if (moved.count === 0) return { ok: false, error: "وضعیت سفارش همزمان تغییر کرد؛ صفحه را تازه کنید." } as const;
 

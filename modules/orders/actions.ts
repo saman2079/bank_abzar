@@ -15,6 +15,7 @@ export async function placeOrderAction(_prev: PlaceOrderState, formData: FormDat
 
   const parsed = placeOrderSchema.safeParse({
     addressId: formString(formData, "addressId"),
+    paymentMethod: formString(formData, "paymentMethod") || "ONLINE",
     note: formString(formData, "note"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "ورودی نامعتبر است." };

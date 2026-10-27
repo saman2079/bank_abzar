@@ -18,11 +18,12 @@ export async function getDashboard() {
       _count: true,
     });
 
-  const [today, month, awaitingProcessing, pendingPayment, refunds, lowStock, recent] = await Promise.all([
+  const [today, month, awaitingProcessing, pendingPayment, pendingConfirmation, refunds, lowStock, recent] = await Promise.all([
     sales(todayStart),
     sales(monthStart),
     db.order.count({ where: { status: "PAID" } }),
     db.order.count({ where: { status: "PENDING_PAYMENT" } }),
+    db.order.count({ where: { status: "PENDING_CONFIRMATION" } }),
     db.payment.count({ where: { needsRefund: true } }),
     listLowStock(10),
     db.order.findMany({
@@ -37,6 +38,7 @@ export async function getDashboard() {
     month: { total: month._sum.total ?? 0, count: month._count },
     awaitingProcessing,
     pendingPayment,
+    pendingConfirmation,
     refunds,
     lowStock,
     recent: recent.map((order) => ({ ...order, status: order.status as OrderStatus })),

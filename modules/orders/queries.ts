@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import type { OrderStatus } from "./constants";
+import type { OrderStatus, PaymentMethod } from "./constants";
 import { addressSnapshotSchema } from "./schemas";
 import type { OrderDetail, OrderListItem } from "./types";
 
@@ -45,6 +45,7 @@ export async function getMyOrder(userId: string, id: string): Promise<OrderDetai
     id: row.id,
     number: row.number,
     status: row.status as OrderStatus,
+    paymentMethod: row.paymentMethod as PaymentMethod,
     subtotal: row.subtotal,
     shippingCost: row.shippingCost,
     discount: row.discount,

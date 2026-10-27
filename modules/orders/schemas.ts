@@ -1,7 +1,9 @@
 import { z } from "zod";
+import { PAYMENT_METHODS } from "./constants";
 
 export const placeOrderSchema = z.object({
   addressId: z.string().min(1, "آدرس تحویل را انتخاب کنید").max(40),
+  paymentMethod: z.enum(PAYMENT_METHODS, { error: "روش پرداخت را انتخاب کنید" }),
   note: z
     .string()
     .trim()

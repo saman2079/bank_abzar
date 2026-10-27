@@ -9,7 +9,7 @@ import { Select } from "@/components/ui/select";
 import { requireStaff } from "@/lib/dal";
 import { formatDateTime, formatNumber, formatToman } from "@/lib/format";
 import { firstParam, pageParam, type RawSearchParams } from "@/lib/query-params";
-import { ORDER_STATUSES, ORDER_STATUS_LABELS, formatOrderNumber } from "@/modules/orders/constants";
+import { ORDER_STATUSES, ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS, formatOrderNumber } from "@/modules/orders/constants";
 import { listAdminOrders } from "@/modules/orders/admin/queries";
 
 export const metadata: Metadata = { title: "سفارش‌ها" };
@@ -52,13 +52,14 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
             <Th>سفارش</Th>
             <Th>مشتری</Th>
             <Th>وضعیت</Th>
+            <Th>پرداخت</Th>
             <Th>مبلغ</Th>
             <Th>زمان</Th>
           </tr>
         </thead>
         <tbody>
           {items.length === 0 ? (
-            <EmptyRow colSpan={5}>سفارشی پیدا نشد.</EmptyRow>
+            <EmptyRow colSpan={6}>سفارشی پیدا نشد.</EmptyRow>
           ) : (
             items.map((order) => (
               <tr key={order.id}>
@@ -76,6 +77,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                 <Td>
                   <OrderStatusBadge status={order.status} />
                 </Td>
+                <Td className="text-muted whitespace-nowrap">{PAYMENT_METHOD_LABELS[order.paymentMethod]}</Td>
                 <Td>{formatToman(order.total)}</Td>
                 <Td className="text-muted whitespace-nowrap">{formatDateTime(order.createdAt)}</Td>
               </tr>

@@ -207,6 +207,7 @@ model Order {
   number          Int                  @unique @default(autoincrement())
   userId          String
   status          OrderStatus          @default(PENDING_PAYMENT)
+  paymentMethod   PaymentMethod        @default(ONLINE)
   /// همه‌ی مبالغ به تومان
   subtotal        Int
   shippingCost    Int
@@ -338,12 +339,20 @@ enum Role {
 
 enum OrderStatus {
   PENDING_PAYMENT
+  /// پرداخت در محل: منتظر تماس تلفنی و تأیید ادمین
+  PENDING_CONFIRMATION
   PAID
   PROCESSING
   SHIPPED
   DELIVERED
   CANCELED
   RETURNED
+}
+
+enum PaymentMethod {
+  ONLINE
+  /// پرداخت در محل هنگام تحویل (فقط تهران)
+  COD
 }
 
 enum StockMovementType {

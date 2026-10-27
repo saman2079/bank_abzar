@@ -2,7 +2,7 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { toLatinDigits } from "@/lib/phone";
-import type { OrderStatus } from "../constants";
+import type { OrderStatus, PaymentMethod } from "../constants";
 import { addressSnapshotSchema } from "../schemas";
 
 const PAGE_SIZE = 20;
@@ -35,6 +35,7 @@ export async function listAdminOrders(filters: { status?: OrderStatus; q?: strin
         id: true,
         number: true,
         status: true,
+        paymentMethod: true,
         total: true,
         createdAt: true,
         user: { select: { name: true, phone: true } },
@@ -43,7 +44,7 @@ export async function listAdminOrders(filters: { status?: OrderStatus; q?: strin
   ]);
 
   return {
-    items: rows.map((row) => ({ ...row, status: row.status as OrderStatus })),
+    items: rows.map((row) => ({ ...row, status: row.status as OrderStatus, paymentMethod: row.paymentMethod as PaymentMethod })),
     total,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
   };
@@ -69,6 +70,7 @@ export async function getAdminOrder(id: string) {
   return {
     ...row,
     status: row.status as OrderStatus,
+    paymentMethod: row.paymentMethod as PaymentMethod,
     address: address.success ? address.data : null,
     createdByLabel: row.createdById ? (labels.get(row.createdById) ?? null) : null,
     history: row.history.map((entry) => ({

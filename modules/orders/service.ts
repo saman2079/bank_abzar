@@ -2,7 +2,8 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { getShippingSettings } from "@/modules/settings/queries";
-import { ORDER_EXPIRY_MINUTES, calcShipping } from "./constants";
+import { COD_CONFIRM_EXPIRY_HOURS, MAX_PENDING_COD_ORDERS, ORDER_EXPIRY_MINUTES, calcShipping } from "./constants";
+import { COD_NOT_ELIGIBLE_MESSAGE, isCodEligible } from "./cod";
 
 /** خطای قابل‌نمایش به کاربر؛ داخل تراکنش پرتاب می‌شود تا همه‌چیز rollback شود. */
 class OrderError extends Error {}
@@ -17,13 +18,23 @@ export type PlaceOrderResult = { ok: true; orderId: string } | { ok: false; erro
  */
 export async function placeOrder(
   userId: string,
-  input: { addressId: string; note: string | null },
+  input: { addressId: string; note: string | null; paymentMethod: "ONLINE" | "COD" },
 ): Promise<PlaceOrderResult> {
   try {
     const shippingSettings = await getShippingSettings();
     const orderId = await db.$transaction(async (tx) => {
       const address = await tx.address.findFirst({ where: { id: input.addressId, userId } });
       if (!address) throw new OrderError("آدرس انتخاب‌شده معتبر نیست.");
+
+      const isCod = input.paymentMethod === "COD";
+      if (isCod) {
+        if (!isCodEligible(address)) throw new OrderError(COD_NOT_ELIGIBLE_MESSAGE);
+
+        const pending = await tx.order.count({ where: { userId, status: "PENDING_CONFIRMATION" } });
+        if (pending >= MAX_PENDING_COD_ORDERS) {
+          throw new OrderError("دو سفارش پرداخت در محل شما در انتظار تأیید تلفنی است؛ بعد از تأیید یا لغو آن‌ها سفارش جدید ثبت کنید.");
+        }
+      }
 
       // ترتیب ثابت قفل‌ها (productId) تا دو سفارش همزمان deadlock نشوند.
       const cartItems = await tx.cartItem.findMany({
@@ -63,13 +74,14 @@ export async function placeOrder(
       const order = await tx.order.create({
         data: {
           userId,
-          status: "PENDING_PAYMENT",
+          status: isCod ? "PENDING_CONFIRMATION" : "PENDING_PAYMENT",
+          paymentMethod: input.paymentMethod,
           subtotal,
           shippingCost,
           total: subtotal + shippingCost,
           addressSnapshot: snapshot,
           note: input.note,
-          expiresAt: new Date(Date.now() + ORDER_EXPIRY_MINUTES * 60_000),
+          expiresAt: new Date(Date.now() + (isCod ? COD_CONFIRM_EXPIRY_HOURS * 3_600_000 : ORDER_EXPIRY_MINUTES * 60_000)),
           createdById: userId,
           items: {
             create: cartItems.map((item) => ({
@@ -80,7 +92,13 @@ export async function placeOrder(
               quantity: item.quantity,
             })),
           },
-          history: { create: { to: "PENDING_PAYMENT", changedById: userId } },
+          history: {
+            create: {
+              to: isCod ? "PENDING_CONFIRMATION" : "PENDING_PAYMENT",
+              changedById: userId,
+              note: isCod ? "پرداخت در محل — منتظر تماس تلفنی و تأیید" : null,
+            },
+          },
         },
         select: { id: true },
       });
@@ -106,9 +124,12 @@ export async function placeOrder(
   }
 }
 
+/** سفارش‌هایی که هنوز تأیید/پرداخت نشده‌اند و موجودی‌شان رزرو است؛ لغو آن‌ها موجودی را برمی‌گرداند. */
+const CANCELABLE_STATUSES = ["PENDING_PAYMENT", "PENDING_CONFIRMATION"] as const;
+
 /**
- * لغو سفارش «در انتظار پرداخت» و برگشت موجودی. idempotent: شرط `status = PENDING_PAYMENT`
- * در UPDATE باعث می‌شود لغو/انقضای تکراری یا همزمان، موجودی را دوبار برنگرداند.
+ * لغو سفارش «در انتظار پرداخت» یا «در انتظار تأیید تلفنی» و برگشت موجودی. idempotent: شرط وضعیت در UPDATE
+ * باعث می‌شود لغو/انقضای تکراری یا همزمان، موجودی را دوبار برنگرداند.
  * `ownerId` برای لغو توسط خود مشتری (ضد IDOR).
  */
 export async function cancelPendingOrder(
@@ -116,8 +137,18 @@ export async function cancelPendingOrder(
   options: { actorId: string | null; note: string; ownerId?: string },
 ): Promise<boolean> {
   return db.$transaction(async (tx) => {
+    const current = await tx.order.findFirst({
+      where: {
+        id: orderId,
+        status: { in: [...CANCELABLE_STATUSES] },
+        ...(options.ownerId ? { userId: options.ownerId } : {}),
+      },
+      select: { status: true },
+    });
+    if (!current) return false;
+
     const changed = await tx.order.updateMany({
-      where: { id: orderId, status: "PENDING_PAYMENT", ...(options.ownerId ? { userId: options.ownerId } : {}) },
+      where: { id: orderId, status: current.status },
       data: { status: "CANCELED", expiresAt: null },
     });
     if (changed.count === 0) return false;
@@ -142,24 +173,25 @@ export async function cancelPendingOrder(
       })),
     });
     await tx.orderStatusHistory.create({
-      data: { orderId, from: "PENDING_PAYMENT", to: "CANCELED", changedById: options.actorId, note: options.note },
+      data: { orderId, from: current.status, to: "CANCELED", changedById: options.actorId, note: options.note },
     });
 
     return true;
   });
 }
 
-/** سفارش‌های پرداخت‌نشده‌ی منقضی را لغو می‌کند (فراخوانی از کرون). تعداد لغوشده را برمی‌گرداند. */
+/** سفارش‌های منقضی (پرداخت‌نشده یا تأییدنشده‌ی تلفنی) را لغو می‌کند (فراخوانی از کرون). تعداد لغوشده را برمی‌گرداند. */
 export async function expireStaleOrders(limit = 100): Promise<number> {
   const stale = await db.order.findMany({
-    where: { status: "PENDING_PAYMENT", expiresAt: { lt: new Date() } },
-    select: { id: true },
+    where: { status: { in: [...CANCELABLE_STATUSES] }, expiresAt: { lt: new Date() } },
+    select: { id: true, status: true },
     take: limit,
   });
 
   let canceled = 0;
   for (const order of stale) {
-    if (await cancelPendingOrder(order.id, { actorId: null, note: "انقضای مهلت پرداخت" })) canceled += 1;
+    const note = order.status === "PENDING_CONFIRMATION" ? "انقضای مهلت تأیید تلفنی" : "انقضای مهلت پرداخت";
+    if (await cancelPendingOrder(order.id, { actorId: null, note })) canceled += 1;
   }
   return canceled;
 }
