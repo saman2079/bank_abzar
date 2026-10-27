@@ -11,6 +11,7 @@
     "db:up": "docker compose -f docker/compose.dev.yml up -d",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "check:concurrency": "tsx --conditions=react-server --env-file=.env.local prisma/check-concurrency.ts",
