@@ -62,6 +62,7 @@ jobs:
           fi
 
       - name: Install dependencies and generate Prisma Client
+        id: dependencies
         run: npm ci
 
       - name: Check migration status before changes
@@ -72,5 +73,5 @@ jobs:
         run: npm run db:deploy
 
       - name: Verify migration status after operation
-        if: ${{ always() }}
+        if: ${{ always() && steps.dependencies.outcome == 'success' }}
         run: npm run db:status
