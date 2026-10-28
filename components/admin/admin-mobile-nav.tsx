@@ -57,7 +57,7 @@ export function AdminMobileNav({ role }: { role: Role }) {
         <aside
           id="admin-drawer"
           className={cn(
-            "bg-surface border-border absolute inset-y-0 start-0 flex w-72 max-w-[85vw] flex-col gap-4 border-e p-4 transition-transform duration-200",
+            "bg-bg border-border absolute inset-y-0 start-0 flex w-72 max-w-[85vw] flex-col gap-4 border-e p-4 transition-transform duration-200",
             open ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full",
           )}
         >

@@ -12,7 +12,7 @@ export function Hero() {
   return (
     <section
       aria-labelledby="hero-title"
-      className="border-border bg-surface relative overflow-hidden rounded-card border bg-[radial-gradient(60%_90%_at_25%_50%,rgba(245,184,0,0.18),transparent)]"
+      className="border-border bg-surface relative overflow-hidden rounded-card border bg-[radial-gradient(60%_90%_at_25%_50%,color-mix(in_srgb,var(--color-primary)_22%,transparent),transparent)]"
     >
       <div className="grid items-center gap-8 p-6 md:grid-cols-2 md:p-12">
         <div>

@@ -30,7 +30,7 @@ export function FormMessage({ error, success }: { error?: string; success?: stri
   }
   if (success) {
     return (
-      <p role="status" className="text-sm text-green-500">
+      <p role="status" className="text-success text-sm">
         {success}
       </p>
     );

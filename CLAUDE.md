@@ -67,7 +67,7 @@ docs/       ARCHITECTURE.md, CHECKLIST.md, STRUCTURE.md, design/
 - env فقط از `lib/env.ts` (Zod).
 
 ## ۷. دیزاین
-دارک‌مود پریمیوم، تأکید زرد، کارت‌های گرد، RTL، Vazirmatn. رفرنس: `docs/design/home.png`. توکن‌ها: `--color-bg`, `--color-surface`, `--color-border`, `--color-primary` (زرد), `--color-danger`.
+دو تم **روشن و تیره** (انتخاب کاربر با `ThemeToggle`؛ ذخیره در localStorage، پیش‌فرض تم سیستم؛ `data-theme` روی `<html>`)، سبک تلگرام (آبی `--color-primary`، گوشه‌های گرد) و **شیشه‌ای** (سطح‌های نیمه‌شفاف + blur روی پس‌زمینه‌ی گرادیانی `--mesh`)، RTL، Vazirmatn. توکن‌ها در `app/globals.css` (متغیرهای `:root` و `:root[data-theme="dark"]` و `@theme inline`): `--color-bg`, `--color-surface`, `--color-surface-2`, `--color-border`, `--color-fg`, `--color-muted`, `--color-primary`, `--color-danger`, `--color-success`. رنگ ثابت (hex) در کامپوننت‌ها ننویس؛ فقط توکن. رفرنس قدیمی (زرد/تیره): `docs/design/home.png`.
 
 ## ۸. MVP در برابر بعدی
 MVP: کاتالوگ + جستجو + سبد + OTP + چک‌اوت + زرین‌پال + انبار + پنل ادمین + مقاله + سئو + دیپلوی.

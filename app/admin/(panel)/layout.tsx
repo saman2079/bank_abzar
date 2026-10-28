@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { LogoutButton } from "@/components/account/logout-button";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { requireStaff } from "@/lib/dal";
 
 async function PanelShell({ children }: { children: React.ReactNode }) {
@@ -16,6 +17,7 @@ async function PanelShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex items-center gap-3 text-sm">
           <span className="text-muted hidden sm:inline">{user.name ?? user.phone}</span>
+          <ThemeToggle />
           <LogoutButton />
         </div>
       </header>

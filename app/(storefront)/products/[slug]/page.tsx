@@ -106,7 +106,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             <p className="text-muted mt-1 text-sm line-through">{formatToman(product.compareAtPrice)}</p>
           ) : null}
 
-          <p className={inStock ? "mt-4 text-sm text-emerald-400" : "text-danger mt-4 text-sm"}>
+          <p className={inStock ? "text-success mt-4 text-sm" : "text-danger mt-4 text-sm"}>
             {inStock ? "موجود در انبار" : "ناموجود"}
           </p>
 

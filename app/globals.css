@@ -1,16 +1,63 @@
 @import "tailwindcss";
 
-@theme {
-  --color-bg: #0a0d14;
-  --color-surface: #11151f;
-  --color-surface-2: #181d2a;
-  --color-border: #232a3a;
-  --color-fg: #f2f4f8;
-  --color-muted: #8a93a6;
-  --color-primary: #f5b800;
-  --color-primary-hover: #ffc929;
-  --color-primary-fg: #14110a;
-  --color-danger: #ef4444;
+/* دو تم (روشن/تیره) با متغیرهای CSS؛ انتخاب کاربر در data-theme روی <html> (اسکریپت app/layout.tsx).
+   سبک: تلگرام (آبی، گوشه‌های گرد) + شیشه‌ای (سطح نیمه‌شفاف + blur روی پس‌زمینه‌ی گرادیانی). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  color-scheme: light;
+  --bg: #e9f0f8;
+  --surface: rgba(255, 255, 255, 0.68);
+  --surface-2: rgba(222, 232, 244, 0.72);
+  --border: rgba(15, 40, 70, 0.12);
+  --fg: #0f1b2a;
+  --muted: #566679;
+  --primary: #1673b3;
+  --primary-hover: #115f95;
+  --primary-fg: #ffffff;
+  --danger: #dc2626;
+  --success: #0f8a5f;
+  --glass-highlight: rgba(255, 255, 255, 0.75);
+  --glass-shadow: rgba(24, 60, 100, 0.22);
+  --mesh:
+    radial-gradient(60% 50% at 8% 0%, rgba(42, 171, 238, 0.3), transparent 70%),
+    radial-gradient(50% 45% at 96% 8%, rgba(124, 140, 255, 0.22), transparent 70%),
+    radial-gradient(60% 50% at 70% 100%, rgba(60, 214, 190, 0.2), transparent 70%);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --surface: rgba(23, 33, 43, 0.66);
+  --surface-2: rgba(38, 54, 72, 0.62);
+  --border: rgba(255, 255, 255, 0.1);
+  --fg: #eaf1f8;
+  --muted: #8fa3b8;
+  --primary: #4db0f5;
+  --primary-hover: #66bcf7;
+  --primary-fg: #06131f;
+  --danger: #e5484d;
+  --success: #3dd9a0;
+  --glass-highlight: rgba(255, 255, 255, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.55);
+  --mesh:
+    radial-gradient(60% 50% at 8% 0%, rgba(42, 171, 238, 0.22), transparent 70%),
+    radial-gradient(50% 45% at 96% 8%, rgba(124, 92, 255, 0.18), transparent 70%),
+    radial-gradient(60% 50% at 70% 100%, rgba(30, 190, 170, 0.12), transparent 70%);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
 
   --font-sans: "Vazirmatn Variable", ui-sans-serif, system-ui, sans-serif;
   --radius-card: 1.25rem;
@@ -23,15 +70,39 @@
   }
 }
 
+/* شیشه: سطح نیمه‌شفاف + محوکردن پس‌زمینه + لبه‌ی روشن بالا. */
+@utility glass {
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 10px 30px -14px var(--glass-shadow);
+}
+
 @layer base {
   html {
-    color-scheme: dark;
     scroll-behavior: smooth;
   }
 
   body {
     background: var(--color-bg);
     color: var(--color-fg);
+  }
+
+  /* پس‌زمینه‌ی گرادیانی ثابت پشت همه‌ی سطح‌های شیشه‌ای */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--mesh);
+    pointer-events: none;
+  }
+
+  /* منوی بازشوی select نباید شفاف باشد */
+  select option {
+    background-color: Canvas;
+    color: CanvasText;
   }
 
   ::selection {
@@ -51,6 +122,18 @@
   body {
     background: #fff !important;
     color: #000 !important;
+  }
+
+  body::before {
+    display: none;
+  }
+}
+
+/* هر سطح کارت‌مانند (`bg-surface`) شیشه‌ای می‌شود. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .bg-surface {
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
   }
 }
 

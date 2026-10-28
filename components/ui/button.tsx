@@ -8,7 +8,8 @@ const base =
   "inline-flex items-center justify-center gap-2 rounded-full font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-primary text-primary-fg hover:bg-primary-hover",
+  primary:
+    "bg-primary text-primary-fg hover:bg-primary-hover shadow-[0_8px_20px_-8px_color-mix(in_srgb,var(--color-primary)_80%,transparent)]",
   outline: "border border-border bg-surface/60 text-fg hover:border-primary hover:text-primary",
   ghost: "text-fg hover:bg-surface-2",
 };

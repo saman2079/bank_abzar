@@ -16,7 +16,9 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-3">
         <div>
           <Link href="/" className="flex items-center gap-2 text-lg font-extrabold">
-            <Wrench className="text-primary size-6" aria-hidden />
+            <span className="grid size-9 place-items-center rounded-xl bg-linear-to-br from-[#3bb8f5] to-[#1b7fc4] text-white shadow-md">
+              <Wrench className="size-5" aria-hidden />
+            </span>
             بانک ابزار
           </Link>
           <p className="text-muted mt-4 text-sm leading-7">

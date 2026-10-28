@@ -60,7 +60,7 @@ export default async function InventoryProductPage({ params }: { params: Promise
                 <tr key={movement.id}>
                   <Td className="text-muted whitespace-nowrap">{formatDateTime(movement.createdAt)}</Td>
                   <Td>{STOCK_MOVEMENT_LABELS[movement.type]}</Td>
-                  <Td dir="ltr" className={movement.delta < 0 ? "text-danger font-bold" : "font-bold text-emerald-400"}>
+                  <Td dir="ltr" className={movement.delta < 0 ? "text-danger font-bold" : "text-success font-bold"}>
                     {movement.delta > 0 ? `+${movement.delta}` : movement.delta}
                   </Td>
                   <Td className="text-muted">{movement.actor}</Td>

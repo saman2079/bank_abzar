@@ -19,14 +19,23 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0d14",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#e9f0f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1220" },
+  ],
   width: "device-width",
   initialScale: 1,
 };
 
+/** قبل از اولین رنگ‌آمیزی تم را می‌گذارد (جلوگیری از چشمک): انتخاب ذخیره‌شده، وگرنه تم سیستم. */
+const THEME_SCRIPT = `(function(){var t="light";try{var s=localStorage.getItem("theme");t=s==="light"||s==="dark"?s:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(e){}document.documentElement.dataset.theme=t})()`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fa" dir="rtl">
+    <html lang="fa" dir="rtl" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="bg-bg text-fg font-sans antialiased">{children}</body>
     </html>
   );

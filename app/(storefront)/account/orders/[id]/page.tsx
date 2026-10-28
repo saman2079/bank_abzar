@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "جزئیات سفارش" };
 type PaymentFlag = "paid" | "failed" | "pending";
 
 const PAYMENT_BANNERS: Record<PaymentFlag, { text: string; tone: string }> = {
-  paid: { text: "پرداخت با موفقیت انجام شد. سپاس از خرید شما.", tone: "border-emerald-500/50 text-emerald-400" },
+  paid: { text: "پرداخت با موفقیت انجام شد. سپاس از خرید شما.", tone: "border-success/50 text-success" },
   failed: { text: "پرداخت انجام نشد. در صورت کسر وجه، مبلغ تا ۷۲ ساعت به حساب شما برمی‌گردد. می‌توانید دوباره پرداخت کنید.", tone: "border-danger/50 text-danger" },
   pending: { text: "نتیجه‌ی پرداخت هنوز تأیید نشده است؛ چند دقیقه بعد همین صفحه را دوباره بررسی کنید.", tone: "border-primary/50 text-primary" },
 };
