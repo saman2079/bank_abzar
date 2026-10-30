@@ -73,7 +73,7 @@ export function AdminMobileNav({ role }: { role: Role }) {
             </button>
           </div>
           <div className="overflow-y-auto">
-            <AdminNav role={role} />
+            <AdminNav role={role} onNavigate={() => setOpen(false)} />
           </div>
         </aside>
       </div>

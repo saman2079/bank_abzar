@@ -1,42 +1,50 @@
+"use client";
+
 import Link from "next/link";
 import { Drill, Minus, Plus, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formatNumber, formatToman } from "@/lib/format";
-import { setCartQuantityAction } from "@/modules/cart/actions";
+import { MAX_CART_QUANTITY } from "@/modules/cart/constants";
 import type { CartLine } from "@/modules/cart/types";
 
-function QuantityForm({
-  productId,
-  quantity,
+function QuantityButton({
   label,
   disabled,
+  onClick,
   children,
 }: {
-  productId: string;
-  quantity: number;
   label: string;
   disabled?: boolean;
+  onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <form action={setCartQuantityAction}>
-      <input type="hidden" name="productId" value={productId} />
-      <input type="hidden" name="quantity" value={quantity} />
-      <button
-        type="submit"
-        aria-label={label}
-        disabled={disabled}
-        className="border-border hover:border-primary hover:text-primary grid size-8 place-items-center rounded-full border transition-colors disabled:pointer-events-none disabled:opacity-40"
-      >
-        {children}
-      </button>
-    </form>
+    <button
+      type="button"
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="border-border hover:border-primary hover:text-primary grid size-8 place-items-center rounded-full border transition-colors disabled:pointer-events-none disabled:opacity-40"
+    >
+      {children}
+    </button>
   );
 }
 
-export function CartLineRow({ line }: { line: CartLine }) {
+/**
+ * ردیف سبد. تعداد و جمع ردیف از state خوش‌بینانه‌ی `CartView` می‌آید (فوری عوض می‌شود)؛
+ * ذخیره‌ی واقعی و بازبینی موجودی/قیمت سمت سرور در پس‌زمینه انجام می‌شود.
+ */
+export function CartLineRow({
+  line,
+  onChangeQuantity,
+}: {
+  line: CartLine;
+  onChangeQuantity: (productId: string, quantity: number) => void;
+}) {
   const soldOut = line.stock < 1;
   const short = !soldOut && line.stock < line.quantity;
+  const cap = Math.min(MAX_CART_QUANTITY, Math.max(line.stock, 1));
 
   return (
     <Card className="flex gap-4 p-4">
@@ -64,16 +72,20 @@ export function CartLineRow({ line }: { line: CartLine }) {
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <QuantityForm productId={line.productId} quantity={line.quantity + 1} label="افزایش تعداد" disabled={soldOut}>
+            <QuantityButton
+              label="افزایش تعداد"
+              disabled={soldOut || line.quantity >= cap}
+              onClick={() => onChangeQuantity(line.productId, line.quantity + 1)}
+            >
               <Plus className="size-4" aria-hidden />
-            </QuantityForm>
+            </QuantityButton>
             <span className="min-w-6 text-center text-sm font-bold">{formatNumber(line.quantity)}</span>
-            <QuantityForm productId={line.productId} quantity={line.quantity - 1} label="کاهش تعداد">
+            <QuantityButton label="کاهش تعداد" onClick={() => onChangeQuantity(line.productId, line.quantity - 1)}>
               <Minus className="size-4" aria-hidden />
-            </QuantityForm>
-            <QuantityForm productId={line.productId} quantity={0} label="حذف از سبد">
+            </QuantityButton>
+            <QuantityButton label="حذف از سبد" onClick={() => onChangeQuantity(line.productId, 0)}>
               <Trash2 className="text-danger size-4" aria-hidden />
-            </QuantityForm>
+            </QuantityButton>
           </div>
           <p className="font-extrabold">{formatToman(line.lineTotal)}</p>
         </div>
