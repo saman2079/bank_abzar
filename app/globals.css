@@ -7,8 +7,8 @@
 :root {
   color-scheme: light;
   --bg: #e9f0f8;
-  --surface: rgba(255, 255, 255, 0.68);
-  --surface-2: rgba(222, 232, 244, 0.72);
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-2: rgba(222, 232, 244, 0.86);
   --border: rgba(15, 40, 70, 0.12);
   --fg: #0f1b2a;
   --muted: #566679;
@@ -28,8 +28,8 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0b1220;
-  --surface: rgba(23, 33, 43, 0.66);
-  --surface-2: rgba(38, 54, 72, 0.62);
+  --surface: rgba(23, 33, 43, 0.86);
+  --surface-2: rgba(38, 54, 72, 0.84);
   --border: rgba(255, 255, 255, 0.1);
   --fg: #eaf1f8;
   --muted: #8fa3b8;
@@ -70,13 +70,21 @@
   }
 }
 
-/* شیشه: سطح نیمه‌شفاف + محوکردن پس‌زمینه + لبه‌ی روشن بالا. */
+/* شیشه‌ی سبک (بدون blur): لبه‌ی روشن بالا + سایه‌ی کم — برای کارت‌ها و سطح‌های تکراری.
+   backdrop-filter گران است؛ روی هر کارت/ورودی باعث کندی اسکرول می‌شد. */
 @utility glass {
-  -webkit-backdrop-filter: blur(18px) saturate(170%);
-  backdrop-filter: blur(18px) saturate(170%);
   box-shadow:
     inset 0 1px 0 var(--glass-highlight),
-    0 10px 30px -14px var(--glass-shadow);
+    0 6px 18px -12px var(--glass-shadow);
+}
+
+/* شیشه‌ی کامل با blur — فقط برای عناصر ثابتِ کم‌تعداد (هدر، ناوبری پایین موبایل). */
+@utility glass-blur {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 6px 18px -12px var(--glass-shadow);
 }
 
 @layer base {
@@ -129,11 +137,11 @@
   }
 }
 
-/* هر سطح کارت‌مانند (`bg-surface`) شیشه‌ای می‌شود. */
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  .bg-surface {
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
-    backdrop-filter: blur(16px) saturate(160%);
+/* کاربرانی که شفافیت کمتر خواسته‌اند: blur خاموش. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-blur {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 

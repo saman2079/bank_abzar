@@ -18,7 +18,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="ناوبری موبایل"
-      className="border-border bg-surface glass fixed inset-x-0 bottom-0 z-40 border-t md:hidden"
+      className="border-border bg-surface glass-blur fixed inset-x-0 bottom-0 z-40 border-t md:hidden"
     >
       <ul className="mx-auto grid max-w-md grid-cols-5">
         {items.map(({ href, label, Icon }) => (

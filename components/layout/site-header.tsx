@@ -52,7 +52,7 @@ function IconLink({ href, label, children }: { href: string; label: string; chil
 
 export function SiteHeader() {
   return (
-    <header className="border-border bg-surface glass sticky top-0 z-40 border-b">
+    <header className="border-border bg-surface glass-blur sticky top-0 z-40 border-b">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 md:gap-8">
         <Link href="/" className="flex items-center gap-2 text-lg font-extrabold">
           <span className="grid size-9 place-items-center rounded-xl bg-linear-to-br from-[#3bb8f5] to-[#1b7fc4] text-white shadow-md">
