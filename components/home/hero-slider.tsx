@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { BannerSlide } from "@/modules/banners/types";
@@ -63,17 +63,22 @@ function SlideBody({ slide, priority }: { slide: BannerSlide; priority: boolean 
 }
 
 /**
- * اسلایدر صفحه‌ی اول. با CSS scroll-snap کار می‌کند (سوایپ لمسی بومی، بدون کتابخانه)؛ جاوااسکریپت فقط برای
- * نقطه‌ها/فلش‌ها و پخش خودکار است. با یک بنر: بدون کنترل و بدون پخش خودکار. پخش خودکار با hover/focus/لمس یا
- * `prefers-reduced-motion` متوقف می‌شود و دکمه‌ی توقف دارد (WCAG 2.2.2).
+ * اسلایدر صفحه‌ی اول، به‌صورت **حلقه‌ای**: از اولین بنر به عقب بروید آخرین بنر می‌آید و از آخرین جلو بروید اولین.
+ * با CSS scroll-snap کار می‌کند (سوایپ لمسی و اسکرول افقی تاچ‌پد/ماوس بومی، بدون کتابخانه). برای حلقه، یک کپی از
+ * آخرین بنر قبل از اولی و یک کپی از اولین بنر بعد از آخری قرار می‌گیرد؛ وقتی اسکرول روی کپی آرام گرفت، بی‌صدا به
+ * بنر واقعی می‌پرد. کپی‌ها فقط بعد از hydration ساخته می‌شوند تا HTML اولیه (و LCP) همان بنر اول باشد.
+ * پخش خودکار با hover/لمس/فوکوس یا `prefers-reduced-motion` متوقف می‌شود. با یک بنر: بدون کنترل و بدون پخش خودکار.
  */
 export function HeroSlider({ slides }: { slides: BannerSlide[] }) {
   const track = useRef<HTMLUListElement>(null);
+  /** شماره‌ی بنر واقعی (۰ تا count-1) */
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [userPaused, setUserPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [looped, setLooped] = useState(false);
   const count = slides.length;
+  // اگر کپی‌ها فعال باشند، بنر واقعی i در موقعیت i+1 است.
+  const offset = looped ? 1 : 0;
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -83,41 +88,78 @@ export function HeroSlider({ slides }: { slides: BannerSlide[] }) {
     return () => query.removeEventListener("change", update);
   }, []);
 
+  useEffect(() => {
+    if (count > 1) setLooped(true);
+  }, [count]);
+
+  /** اسکرول به موقعیت `position` از لیست (شامل کپی‌ها). جهت‌مستقل (RTL/LTR): از اختلاف لبه‌ها استفاده می‌شود. */
+  const scrollToPosition = useCallback((position: number, smooth: boolean) => {
+    const el = track.current;
+    const item = el?.children[position] as HTMLElement | undefined;
+    if (!el || !item) return;
+    const delta = item.getBoundingClientRect().left - el.getBoundingClientRect().left;
+    el.scrollTo({ left: el.scrollLeft + delta, behavior: smooth ? "smooth" : "instant" });
+  }, []);
+
+  // بعد از ساخته‌شدن کپی‌ها، قبل از paint روی بنر اول واقعی بایست (بدون پرش دیده‌شدنی).
+  useLayoutEffect(() => {
+    if (looped) scrollToPosition(1, false);
+  }, [looped, scrollToPosition]);
+
   const goTo = useCallback(
     (target: number) => {
-      const el = track.current;
-      if (!el || count === 0) return;
-      const next = (target + count) % count;
-      // در RTL، scrollLeft منفی است؛ از موقعیت خود آیتم استفاده می‌کنیم تا به جهت وابسته نباشد.
-      const item = el.children[next] as HTMLElement | undefined;
-      item?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "nearest", inline: "start" });
+      // target می‌تواند -1 یا count باشد (رفتن روی کپی)؛ بعد از آرام‌گرفتن اسکرول به بنر واقعی می‌پرد.
+      scrollToPosition(target + offset, !reducedMotion);
     },
-    [count, reducedMotion],
+    [offset, reducedMotion, scrollToPosition],
   );
 
-  // نقطه‌ی فعال را از موقعیت اسکرول (سوایپ/فلش/خودکار) می‌خوانیم.
+  // بنر فعال (نقطه‌ها) + پرش بی‌صدا از کپی به بنر واقعی بعد از آرام‌گرفتن اسکرول.
   useEffect(() => {
     const el = track.current;
-    if (!el || count < 2) return;
+    if (!el || count < 2 || !looped) return;
+
+    const toReal = (position: number) => (position - 1 + count) % count;
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
-            setIndex(Array.prototype.indexOf.call(el.children, entry.target));
+            setIndex(toReal(Array.prototype.indexOf.call(el.children, entry.target)));
           }
         }
       },
       { root: el, threshold: [0.6] },
     );
     for (const child of Array.from(el.children)) observer.observe(child);
-    return () => observer.disconnect();
-  }, [count]);
+
+    let settle: number | undefined;
+    const onScroll = () => {
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        const width = el.clientWidth;
+        if (width === 0) return;
+        // موقعیت فعلی = فاصله‌ی لبه‌ی اولین آیتم تا لبه‌ی ظرف، تقسیم بر عرض (جهت‌مستقل)
+        const first = el.children[0] as HTMLElement;
+        const position = Math.round((el.getBoundingClientRect().left - first.getBoundingClientRect().left) / width);
+        if (position === 0) scrollToPosition(count, false);
+        else if (position === count + 1) scrollToPosition(1, false);
+      }, 120);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      el.removeEventListener("scroll", onScroll);
+      window.clearTimeout(settle);
+    };
+  }, [count, looped, scrollToPosition]);
 
   useEffect(() => {
-    if (count < 2 || paused || userPaused || reducedMotion) return;
+    if (count < 2 || paused || reducedMotion) return;
     const timer = window.setInterval(() => goTo(index + 1), AUTOPLAY_MS);
     return () => window.clearInterval(timer);
-  }, [count, paused, userPaused, reducedMotion, index, goTo]);
+  }, [count, paused, reducedMotion, index, goTo]);
 
   const frame = "border-border bg-surface relative overflow-hidden rounded-card border";
 
@@ -137,6 +179,15 @@ export function HeroSlider({ slides }: { slides: BannerSlide[] }) {
     );
   }
 
+  /** ردیف‌های رندر: با حلقه، کپی آخرین ابتدا و کپی اولین انتها اضافه می‌شود (aria-hidden، خارج از ترتیب تب). */
+  const items = looped
+    ? [
+        { slide: slides[count - 1]!, real: count - 1, clone: true, key: "clone-last" },
+        ...slides.map((slide, real) => ({ slide, real, clone: false, key: slide.id })),
+        { slide: slides[0]!, real: 0, clone: true, key: "clone-first" },
+      ]
+    : slides.map((slide, real) => ({ slide, real, clone: false, key: slide.id }));
+
   return (
     <section
       aria-roledescription="carousel"
@@ -149,22 +200,23 @@ export function HeroSlider({ slides }: { slides: BannerSlide[] }) {
       onTouchStart={() => setPaused(true)}
       onTouchEnd={() => setPaused(false)}
     >
-      <ul ref={track} className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto scroll-smooth" aria-live={paused || userPaused ? "polite" : "off"}>
-        {slides.map((slide, i) => {
-          const body = <SlideBody slide={slide} priority={i === 0} />;
+      <ul ref={track} className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain" aria-live={paused ? "polite" : "off"}>
+        {items.map(({ slide, real, clone, key }) => {
+          const body = <SlideBody slide={slide} priority={!clone && real === 0} />;
           return (
             <li
-              key={slide.id}
+              key={key}
               role="group"
               aria-roledescription="slide"
-              aria-label={`${i + 1} از ${count}`}
+              aria-label={`${real + 1} از ${count}`}
+              aria-hidden={clone || undefined}
               className="w-full shrink-0 snap-start"
             >
               {slide.linkUrl ? (
                 <Link
                   href={slide.linkUrl}
                   {...(isExternal(slide.linkUrl) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  tabIndex={i === index ? 0 : -1}
+                  tabIndex={!clone && real === index ? 0 : -1}
                   className="block"
                 >
                   {body}
@@ -194,7 +246,7 @@ export function HeroSlider({ slides }: { slides: BannerSlide[] }) {
         <ChevronLeft className="size-5" aria-hidden />
       </button>
 
-      <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-3">
+      <div className="absolute inset-x-0 bottom-3 flex items-center justify-center">
         <div className="glass border-border flex items-center gap-1.5 rounded-full border px-3 py-1.5">
           {slides.map((slide, i) => (
             <button
@@ -206,16 +258,6 @@ export function HeroSlider({ slides }: { slides: BannerSlide[] }) {
               className={cn("h-2 rounded-full transition-all", i === index ? "bg-primary w-6" : "bg-muted/50 w-2")}
             />
           ))}
-          {!reducedMotion ? (
-            <button
-              type="button"
-              onClick={() => setUserPaused((value) => !value)}
-              aria-label={userPaused ? "پخش خودکار" : "توقف پخش خودکار"}
-              className="text-muted hover:text-fg ms-1"
-            >
-              {userPaused ? <Play className="size-3.5" aria-hidden /> : <Pause className="size-3.5" aria-hidden />}
-            </button>
-          ) : null}
         </div>
       </div>
     </section>
