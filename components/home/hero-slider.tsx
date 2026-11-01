@@ -139,9 +139,9 @@ export function HeroSlider({ slides }: { slides: BannerSlide[] }) {
       settle = window.setTimeout(() => {
         const width = el.clientWidth;
         if (width === 0) return;
-        // موقعیت فعلی = فاصله‌ی لبه‌ی اولین آیتم تا لبه‌ی ظرف، تقسیم بر عرض (جهت‌مستقل)
+        // موقعیت فعلی = قدر مطلق فاصله‌ی لبه‌ی اولین آیتم تا ظرف، تقسیم بر عرض (علامتش در RTL/LTR فرق دارد، قدرمطلقش نه)
         const first = el.children[0] as HTMLElement;
-        const position = Math.round((el.getBoundingClientRect().left - first.getBoundingClientRect().left) / width);
+        const position = Math.round(Math.abs(el.getBoundingClientRect().left - first.getBoundingClientRect().left) / width);
         if (position === 0) scrollToPosition(count, false);
         else if (position === count + 1) scrollToPosition(1, false);
       }, 120);
