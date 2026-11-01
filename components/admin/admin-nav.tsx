@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Boxes, ClipboardList, FileText, LayoutDashboard, Newspaper, Package, ScrollText, Settings, Tags, Users, Warehouse } from "lucide-react";
+import { Boxes, ClipboardList, Images, FileText, LayoutDashboard, Newspaper, Package, ScrollText, Settings, Tags, Users, Warehouse } from "lucide-react";
 import type { Role } from "@/modules/auth/constants";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const items = [
   { href: "/admin/orders", label: "سفارش‌ها", Icon: ClipboardList, adminOnly: false },
   { href: "/admin/invoices", label: "فاکتورها", Icon: FileText, adminOnly: false },
   { href: "/admin/articles", label: "مقاله‌ها", Icon: Newspaper, adminOnly: false },
+  { href: "/admin/banners", label: "بنرها", Icon: Images, adminOnly: false },
   { href: "/admin/products", label: "محصولات", Icon: Package, adminOnly: false },
   { href: "/admin/categories", label: "دسته‌ها", Icon: Boxes, adminOnly: false },
   { href: "/admin/brands", label: "برندها", Icon: Tags, adminOnly: false },

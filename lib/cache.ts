@@ -9,6 +9,7 @@ export const CACHE_TAGS = {
   categories: "categories",
   brands: "brands",
   settings: "settings",
+  banners: "banners",
   articles: "articles",
   article: (slug: string) => `article:${slug}`,
   product: (slug: string) => `product:${slug}`,

@@ -118,6 +118,22 @@ export async function listFeaturedProducts(limit = 5): Promise<ProductDetail[]> 
   return rows.map(toProductDetail);
 }
 
+/** جدیدترین محصولات فعال و موجود (بخش «تازه‌ها» صفحه‌ی اول). */
+export async function listNewestProducts(limit = 8): Promise<ProductDetail[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.catalog);
+
+  const rows = await db.product.findMany({
+    where: { status: "ACTIVE", stock: { gt: 0 } },
+    orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+    take: limit,
+    include: productInclude,
+  });
+
+  return rows.map(toProductDetail);
+}
+
 export async function listBrands(): Promise<string[]> {
   "use cache";
   cacheLife("hours");

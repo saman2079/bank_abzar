@@ -485,3 +485,30 @@ model ArticleSlugHistory {
   @@index([slug])
   @@index([articleId])
 }
+
+/// بنر اسلایدر صفحه‌ی اول. ادمین هر تعداد بنر می‌سازد؛ فقط بنرهای «فعال» و داخل بازه‌ی زمانی (اختیاری) نمایش داده می‌شوند.
+/// بدون تصویر، بنر با پس‌زمینه‌ی گرادیانی تم و متن نمایش داده می‌شود.
+model Banner {
+  id             String    @id @default(cuid())
+  /// عنوان بزرگ روی بنر (و نام داخلی در پنل)
+  title          String
+  subtitle       String?
+  /// متن دکمه (اختیاری)؛ بدون آن کل بنر لینک است اگر `linkUrl` داشته باشد
+  ctaLabel       String?
+  /// مسیر داخلی (`/products`) یا https خارجی
+  linkUrl        String?
+  /// تصویر دسکتاپ (نسبت پیشنهادی ۳:۱)
+  imageUrl       String?
+  /// تصویر موبایل (اختیاری، نسبت پیشنهادی ۴:۳)؛ ندارد → همان تصویر دسکتاپ
+  mobileImageUrl String?
+  imageAlt       String?
+  isActive       Boolean   @default(true)
+  sortOrder      Int       @default(0)
+  /// شروع/پایان نمایش (اختیاری) برای کمپین‌های زمان‌دار
+  startsAt       DateTime?
+  endsAt         DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([isActive, sortOrder])
+}
