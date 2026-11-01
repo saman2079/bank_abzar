@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { BannerSlide } from "@/modules/banners/types";
 
 const AUTOPLAY_MS = 6000;
+
+const noopSubscribe = () => () => {};
 
 function isExternal(url: string) {
   return /^https?:\/\//.test(url);
@@ -75,8 +77,14 @@ export function HeroSlider({ slides }: { slides: BannerSlide[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [looped, setLooped] = useState(false);
+  // سمت سرور و hydration = false؛ بعد از آن true. (کپی‌های حلقه فقط سمت کلاینت ساخته می‌شوند.)
+  const hydrated = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
   const count = slides.length;
+  const looped = hydrated && count > 1;
   // اگر کپی‌ها فعال باشند، بنر واقعی i در موقعیت i+1 است.
   const offset = looped ? 1 : 0;
 
@@ -87,10 +95,6 @@ export function HeroSlider({ slides }: { slides: BannerSlide[] }) {
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
   }, []);
-
-  useEffect(() => {
-    if (count > 1) setLooped(true);
-  }, [count]);
 
   /** اسکرول به موقعیت `position` از لیست (شامل کپی‌ها). جهت‌مستقل (RTL/LTR): از اختلاف لبه‌ها استفاده می‌شود. */
   const scrollToPosition = useCallback((position: number, smooth: boolean) => {
