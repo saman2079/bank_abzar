@@ -56,6 +56,8 @@ export async function getInvoice(id: string) {
   return {
     ...row,
     status: row.status as InvoiceStatus,
+    /** منقضی‌بودن پیش‌فاکتور در لحظه‌ی خواندن (اینجا محاسبه می‌شود تا کامپوننت رندر «خالص» بماند). */
+    isExpired: row.status === "PROFORMA" && row.validUntil !== null && row.validUntil.getTime() < Date.now(),
     createdByLabel: label(row.createdById),
     finalizedByLabel: label(row.finalizedById),
     canceledByLabel: label(row.canceledById),

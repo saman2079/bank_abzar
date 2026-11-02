@@ -16,6 +16,8 @@ export type InvoiceDocumentData = {
   note: string | null;
   paymentNote: string | null;
   validUntil: Date | null;
+  /** پیش‌فاکتورِ گذشته از اعتبار؛ توسط `getInvoice` محاسبه می‌شود */
+  isExpired: boolean;
   createdAt: Date;
   finalizedAt: Date | null;
   canceledAt: Date | null;
@@ -42,7 +44,7 @@ const td = "border border-neutral-300 px-2 py-2 text-xs";
 export function InvoiceDocument({ invoice }: { invoice: InvoiceDocumentData }) {
   const title = INVOICE_DOC_TITLES[invoice.status];
   const issuedAt = invoice.finalizedAt ?? invoice.createdAt;
-  const expired = invoice.status === "PROFORMA" && invoice.validUntil !== null && invoice.validUntil.getTime() < Date.now();
+  const expired = invoice.isExpired;
 
   return (
     <article

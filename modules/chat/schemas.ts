@@ -4,7 +4,7 @@ import { MAX_MESSAGE_LENGTH, MAX_NAME_LENGTH } from "./constants";
 /** متن پیام: فقط متن ساده؛ فاصله‌های اضافه و نویسه‌های کنترلی حذف می‌شود. */
 const messageBody = z
   .string()
-  // eslint-disable-next-line no-control-regex -- حذف عمدی نویسه‌های کنترلی (به‌جز خط جدید)
+  // حذف عمدی نویسه‌های کنترلی (به‌جز خط جدید)
   .transform((value) => value.replace(/[\u0000-\u0009\u000B-\u001F\u007F]/g, "").trim())
   .pipe(z.string().min(1, "پیام خالی است").max(MAX_MESSAGE_LENGTH, `پیام حداکثر ${MAX_MESSAGE_LENGTH} نویسه است`));
 
