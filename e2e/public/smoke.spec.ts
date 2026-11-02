@@ -126,3 +126,28 @@ test.describe("دسترسی ناشناس (ضد دور زدن احراز هویت
     }
   });
 });
+
+test.describe("health و چت‌باکس", () => {
+  test("GET /api/health سالم است و کش نمی‌شود", async ({ request }) => {
+    const response = await request.get("/api/health");
+    expect(response.status()).toBe(200);
+    expect(response.headers()["cache-control"]).toContain("no-store");
+    expect((await response.json()).ok).toBe(true);
+  });
+
+  test("چت‌باکس باز می‌شود و پیام بازدیدکننده ثبت می‌شود", async ({ page }) => {
+    await page.goto("/");
+    const openButton = page.getByRole("button", { name: "گفتگو با پشتیبانی" });
+    const panel = page.getByRole("region", { name: "گفتگو با پشتیبانی" });
+
+    // کلیک تا آماده‌شدن hydration تکرار می‌شود
+    await expect(async () => {
+      await openButton.click({ timeout: 1000 });
+      await expect(panel).toBeVisible({ timeout: 1000 });
+    }).toPass();
+
+    await page.getByRole("textbox", { name: "پیام شما" }).fill("سلام، این یک پیام آزمایشی است");
+    await page.getByRole("button", { name: "ارسال پیام" }).click();
+    await expect(panel.getByRole("log").getByText("سلام، این یک پیام آزمایشی است")).toBeVisible();
+  });
+});

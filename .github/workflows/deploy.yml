@@ -1,0 +1,92 @@
+name: Deploy
+
+# CI/CD روی Vercel (بدون Docker):
+#   ۱) CI روی master سبز می‌شود  ۲) همین‌جا مایگریشن‌های دیتابیس production اعمال می‌شود
+#   ۳) health-check صبر می‌کند تا نسخه‌ی تازه (همین کامیت) روی سایت بالا بیاید.
+# خود build/انتشار را Vercel (اتصال Git) انجام می‌دهد. اگر هنوز secretها را نساخته‌اید، job بدون خطا رد می‌شود.
+# راهنمای تنظیم: docs/CICD.md
+
+on:
+  workflow_run:
+    workflows: [CI]
+    branches: [master]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate-and-verify:
+    name: Migrate + health check
+    # فقط وقتی CI موفق بوده (یا اجرای دستی)
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+      SITE_URL: ${{ vars.SITE_URL }}
+      # کامیت دقیقی که CI روی آن سبز شده
+      TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - name: Check configuration
+        id: config
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$SITE_URL" ]; then
+            echo "::warning::secret PRODUCTION_DATABASE_URL یا variable SITE_URL تنظیم نشده؛ deploy رد شد (docs/CICD.md)."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.ready == 'true'
+        with:
+          ref: ${{ env.TARGET_SHA }}
+
+      - uses: actions/setup-node@v4
+        if: steps.config.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        if: steps.config.outputs.ready == 'true'
+        run: npm ci --ignore-scripts
+
+      # فقط مایگریشن‌های commit‌شده اعمال می‌شود (هرگز migrate dev / reset). idempotent است.
+      - name: Apply database migrations
+        if: steps.config.outputs.ready == 'true'
+        run: npx prisma migrate deploy
+
+      - name: Wait for the new version and check health
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          url="${SITE_URL%/}/api/health"
+          echo "Checking $url for commit ${TARGET_SHA:0:7}"
+          for attempt in $(seq 1 40); do
+            body=$(curl -fsS --max-time 15 "$url" 2>/dev/null || true)
+            ok=$(echo "$body" | jq -r '.ok // empty' 2>/dev/null || true)
+            commit=$(echo "$body" | jq -r '.commit // empty' 2>/dev/null || true)
+            if [ "$ok" = "true" ]; then
+              if [ -z "$commit" ]; then
+                echo "::warning::سایت سالم است ولی commit برنمی‌گرداند (VERCEL_GIT_COMMIT_SHA در Vercel فعال نیست)؛ نسخه‌ی تازه تأیید نشد."
+                exit 0
+              fi
+              if [ "$commit" = "$TARGET_SHA" ]; then
+                echo "OK: نسخه‌ی ${TARGET_SHA:0:7} بالا است و دیتابیس وصل است."
+                exit 0
+              fi
+              echo "[$attempt/40] سایت سالم است ولی هنوز نسخه‌ی قبلی (${commit:0:7}) را می‌دهد؛ منتظر Vercel…"
+            else
+              echo "[$attempt/40] پاسخ سالم نیست؛ دوباره تلاش می‌شود…"
+            fi
+            sleep 20
+          done
+          echo "::error::تا ۱۳ دقیقه نسخه‌ی ${TARGET_SHA:0:7} سالم بالا نیامد. Build را در Vercel ببینید و در صورت نیاز Instant Rollback بزنید (docs/CICD.md)."
+          exit 1

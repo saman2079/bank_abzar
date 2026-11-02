@@ -18,10 +18,13 @@
 |---|---|
 | `(storefront)/` | سایت مشتری: `blog` (لیست) و `blog/[slug]` (مقاله + ریدایرکت نامک قدیمی)، `page.tsx` هوم، `products`، `categories`، `cart`، `checkout`، `login`، `about/contact/rules`، `account/` (پروفایل، آدرس‌ها، سفارش‌ها) |
 | `admin/login` | ورود ادمین/کارمند (رمز) |
-| `admin/(panel)/` | پنل (گیت `requireStaff`): `page.tsx` داشبورد، `banners` (+`new`، `[id]`)، `products`، `categories`، `brands`، `inventory`، `orders` (+`new` سفارش دستی، `[id]`)، `invoices` (+`new`، `[id]` سند/چاپ، `[id]/edit`)، `users` (ADMIN)، `audit` (ADMIN)، `settings` (ADMIN) |
+| `admin/(panel)/` | پنل (گیت `requireStaff`): `page.tsx` داشبورد، `banners` (+`new`، `[id]`)، `chat` (+`[id]`)، `products`، `categories`، `brands`، `inventory`، `orders` (+`new` سفارش دستی، `[id]`)، `invoices` (+`new`، `[id]` سند/چاپ، `[id]/edit`)، `users` (ADMIN)، `audit` (ADMIN)، `settings` (ADMIN) |
 | `api/payments/zarinpal/callback` | بازگشت درگاه → verify → PAID |
 | `api/internal/cron` | کرون (GET/POST با `Bearer CRON_SECRET`): انقضای سفارش، بازبینی پرداخت، پاک‌سازی |
 | `api/admin/products/[id]/images` | آپلود چندفایلی تصویر محصول (staff) |
+| `api/health` | health-check (دیتابیس + کامیت) برای `deploy.yml` و مانیتورینگ |
+| `api/chat` | چت بازدیدکننده: GET (poll)، POST (ارسال) |
+| `api/admin/chat/[id]` · `api/admin/chat/unread` | چت ادمین: poll/پاسخ، شمارنده‌ی خوانده‌نشده |
 | `api/admin/banners/images` | آپلود تصویر بنر (staff؛ WebP، Origin، rate-limit) |
 | `uploads/[...path]` | سرو تصاویر درایور `local` (روی Vercel بلااستفاده) |
 
@@ -41,6 +44,7 @@
 | `inventory/` | تغییر دستی موجودی + دفتر `StockMovement` |
 | `media/` | پردازش sharp→WebP، افزودن/حذف/جابه‌جایی/alt تصاویر محصول |
 | `settings/` | تنظیمات فروشگاه (فعلاً هزینه‌ی ارسال) |
+| `chat/` | چت پشتیبانی: `constants`، `schemas`، `types`، `cookie`، `service` (پیام بازدیدکننده + poll؛ هویت = کوکی تصادفی، فقط SHA-256 در DB)، `admin/{queries,service,actions}` (پاسخ/خواندن/بستن/حذف)؛ UI: `components/chat/chat-widget.tsx` (سایت) و `components/admin/{chat-thread,chat-nav-badge}.tsx` (پنل) |
 | `banners/` | بنرهای اسلایدر صفحه‌ی اول: `types`، `constants` (سقف ۸ بنر فعال)، `schemas` (لینک فقط `/…` یا https؛ تصویر فقط آپلود خود سایت/Blob)، `queries` (`listActiveBanners`: فعال + بازه‌ی زمانی، `use cache` ۱ دقیقه + تگ `banners`)، `admin/{queries,actions}` (ذخیره، روشن/خاموش، جابه‌جایی ترتیب، حذف؛ همه با AuditLog و `updateTag`)؛ تصویر: `modules/media/banner-image.ts` |
 | `dashboard/` · `audit/` | کوئری‌های داشبورد · گزارش تغییرات |
 
@@ -49,6 +53,9 @@
 
 ## `components/`
 `ui/` پایه · `layout/` هدر/فوتر/ناوبری · `home/` هوم (`hero` پیش‌فرض، `hero-slider` بنرهای ادمین، `product-rail`، `brand-strip`، `latest-articles`، `section-header`، `category-strip`، `trust-bar`، `promo-banners`، `tool-finder`) · `catalog/` لیست · `shared/` (کارت محصول، `product-image`، JSON-LD، breadcrumb) · `auth/` · `account/` · `cart/` · `orders/` · `invoices/` (سند چاپی A4 + نشان وضعیت + دکمه‌ی چاپ) · `admin/` (منوی ریسپانسیو `admin-nav`/`admin-mobile-nav`، فرم‌ها و جدول‌های پنل؛ `product-images`، `manual-order-form`، `shipping-settings-form`، …).
+
+## CI/CD
+`.github/workflows/{ci,deploy,security}.yml` · `docs/CICD.md` (جریان، secretها، rollback) · `app/api/health/route.ts`.
 
 ## تست و امنیت (فاز ۸)
 `tests/unit/*.test.ts` + `tests/stubs/server-only.ts` + `vitest.config.ts` (واحد) · `e2e/` (`auth.setup.ts`، `public/smoke.spec.ts`، `admin/panel.spec.ts`) + `playwright.config.ts` · `.github/workflows/{ci,security}.yml` + `.github/dependabot.yml` · `docs/SECURITY.md` · هدرها/CSP در `next.config.ts`.

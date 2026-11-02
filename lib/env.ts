@@ -26,6 +26,9 @@ const envSchema = z
     STORAGE_DRIVER: z.enum(["local", "blob"]).default("local"),
     UPLOAD_DIR: z.string().min(1).default("uploads"),
     BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
+
+    // CI/CD: Vercel خودش می‌گذارد؛ health-check با آن مطمئن می‌شود نسخه‌ی تازه بالا آمده.
+    VERCEL_GIT_COMMIT_SHA: z.string().min(7).optional(),
   })
   .superRefine((value, ctx) => {
     if (value.STORAGE_DRIVER === "blob" && !value.BLOB_READ_WRITE_TOKEN) {

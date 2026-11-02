@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Boxes, ClipboardList, Images, FileText, LayoutDashboard, Newspaper, Package, ScrollText, Settings, Tags, Users, Warehouse } from "lucide-react";
+import { Boxes, ClipboardList, Images, MessageCircle, FileText, LayoutDashboard, Newspaper, Package, ScrollText, Settings, Tags, Users, Warehouse } from "lucide-react";
 import type { Role } from "@/modules/auth/constants";
+import { ChatNavBadge } from "@/components/admin/chat-nav-badge";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/admin", label: "داشبورد", Icon: LayoutDashboard, adminOnly: false },
   { href: "/admin/orders", label: "سفارش‌ها", Icon: ClipboardList, adminOnly: false },
   { href: "/admin/invoices", label: "فاکتورها", Icon: FileText, adminOnly: false },
+  { href: "/admin/chat", label: "گفتگوها", Icon: MessageCircle, adminOnly: false },
   { href: "/admin/articles", label: "مقاله‌ها", Icon: Newspaper, adminOnly: false },
   { href: "/admin/banners", label: "بنرها", Icon: Images, adminOnly: false },
   { href: "/admin/products", label: "محصولات", Icon: Package, adminOnly: false },
@@ -54,6 +56,7 @@ export function AdminNav({ role, onNavigate }: { role: Role; onNavigate?: () => 
             >
               <Icon className="size-4" aria-hidden />
               {label}
+              {href === "/admin/chat" ? <ChatNavBadge /> : null}
             </Link>
           );
         })}
