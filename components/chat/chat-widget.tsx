@@ -190,7 +190,7 @@ export function ChatWidget() {
                 maxLength={MAX_NAME_LENGTH}
                 placeholder="نام شما (اختیاری)"
                 aria-label="نام شما (اختیاری)"
-                className="border-border bg-surface placeholder:text-muted focus:border-primary h-9 w-full rounded-full border px-4 text-sm outline-none"
+                className="border-border bg-surface-2 text-fg placeholder:text-muted focus:border-primary focus:ring-primary/30 focus:ring-2 h-9 w-full rounded-full border px-4 text-sm outline-none"
               />
             ) : null}
             {error ? (
@@ -213,7 +213,7 @@ export function ChatWidget() {
                 rows={1}
                 placeholder="پیام شما…"
                 aria-label="پیام شما"
-                className="border-border bg-surface placeholder:text-muted focus:border-primary max-h-28 min-h-10 flex-1 resize-none rounded-2xl border px-4 py-2 text-sm leading-6 outline-none"
+                className="border-border bg-surface-2 text-fg placeholder:text-muted focus:border-primary focus:ring-primary/30 focus:ring-2 max-h-28 min-h-10 flex-1 resize-none rounded-2xl border px-4 py-2 text-sm leading-6 outline-none"
               />
               <Button type="submit" size="sm" disabled={sending || text.trim() === ""} aria-label="ارسال پیام" className="size-10 shrink-0 px-0">
                 <Send className="size-4 rotate-180" aria-hidden />
