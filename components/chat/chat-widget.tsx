@@ -150,7 +150,7 @@ export function ChatWidget() {
       {open ? (
         <section
           aria-label="گفتگو با پشتیبانی"
-          className="glass border-border fixed end-3 bottom-20 z-50 flex h-[min(34rem,calc(100dvh-7rem))] w-[min(22rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-card border shadow-2xl md:end-6 md:bottom-6"
+          className="bg-bg border-border fixed end-3 bottom-20 z-50 flex h-[min(34rem,calc(100dvh-7rem))] w-[min(22rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-card border shadow-2xl md:end-6 md:bottom-6"
         >
           <header className="border-border flex items-center justify-between gap-3 border-b px-4 py-3">
             <div>
