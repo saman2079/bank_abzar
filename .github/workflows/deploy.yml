@@ -49,7 +49,7 @@ jobs:
         with:
           ref: ${{ env.TARGET_SHA }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.config.outputs.ready == 'true'
         with:
           node-version: 22
