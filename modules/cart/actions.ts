@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { formString } from "@/lib/form";
 import { rateLimit } from "@/lib/rate-limit";
 import { getRequestMeta } from "@/lib/request";
+import { trackAddToCart } from "@/modules/analytics/service";
 import { addToCartSchema, setQuantitySchema } from "./schemas";
 import { addToCart, setCartQuantity } from "./service";
 
@@ -22,7 +23,8 @@ export async function addToCartAction(formData: FormData): Promise<void> {
   const parsed = addToCartSchema.safeParse({ productId: formString(formData, "productId") });
   if (!parsed.success || !(await withinCartLimit())) return;
 
-  await addToCart(parsed.data.productId);
+  const result = await addToCart(parsed.data.productId);
+  if (result.ok) await trackAddToCart(parsed.data.productId);
   refreshEverywhere();
 }
 

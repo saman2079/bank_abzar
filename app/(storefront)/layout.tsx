@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
 import { ChatWidget } from "@/components/chat/chat-widget";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -12,6 +14,9 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
       <SiteFooter />
       <BottomNav />
       <ChatWidget />
+      <Suspense fallback={null}>
+        <AnalyticsTracker />
+      </Suspense>
     </FavoritesProvider>
   );
 }

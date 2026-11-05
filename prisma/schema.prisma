@@ -557,3 +557,43 @@ model ChatMessage {
 
   @@index([conversationId, seq])
 }
+
+/// رویداد آنالیتیکس (بازدید صفحه، ماندگاری، افزودن به سبد). بدون IP و بدون داده‌ی شخصی؛ شناسه‌ها تصادفی‌اند.
+model AnalyticsEvent {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  /// VIEW | LEAVE | ADD_TO_CART
+  type          String
+  /// HOME | PRODUCTS | PRODUCT | CATEGORY | BLOG | ARTICLE | CART | CHECKOUT | ACCOUNT | LOGIN | OTHER
+  kind          String
+  path          String
+  /// کوکی تصادفی بازدیدکننده (۱۸۰ روز) و کوکی نشست (۳۰ دقیقه)
+  visitorId     String
+  sessionId     String
+  userId        String?
+  productId     String?
+  articleId     String?
+  categoryId    String?
+  /// اولین رویداد نشست؛ فقط روی آن‌ها منبع ترافیک ثبت می‌شود
+  isEntry       Boolean  @default(false)
+  newVisitor    Boolean  @default(false)
+  /// DIRECT | SEARCH | TELEGRAM | INSTAGRAM | WHATSAPP | MESSENGER | SOCIAL | REFERRAL | INTERNAL
+  source        String?
+  referrerHost  String?
+  utmSource     String?
+  utmMedium     String?
+  utmCampaign   String?
+  /// نوع صفحه‌ی قبلی داخل سایت و (اگر مقاله بود) شناسه‌ی آن مقاله
+  prevKind      String?
+  fromArticleId String?
+  device        String?
+  durationSec   Int?
+  scrollPct     Int?
+
+  @@index([createdAt])
+  @@index([type, kind, createdAt])
+  @@index([productId, type, createdAt])
+  @@index([articleId, type, createdAt])
+  @@index([sessionId])
+  @@index([visitorId, createdAt])
+}
