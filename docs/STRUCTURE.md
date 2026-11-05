@@ -46,6 +46,7 @@
 | `settings/` | تنظیمات فروشگاه (فعلاً هزینه‌ی ارسال) |
 | `chat/` | چت پشتیبانی: `constants`، `schemas`، `types`، `cookie`، `service` (پیام بازدیدکننده + poll؛ هویت = کوکی تصادفی، فقط SHA-256 در DB)، `admin/{queries,service,actions}` (پاسخ/خواندن/بستن/حذف)؛ UI: `components/chat/chat-widget.tsx` (سایت) و `components/admin/{chat-thread,chat-nav-badge}.tsx` (پنل) |
 | `banners/` | بنرهای اسلایدر صفحه‌ی اول: `types`، `constants` (سقف ۸ بنر فعال)، `schemas` (لینک فقط `/…` یا https؛ تصویر فقط آپلود خود سایت/Blob)، `queries` (`listActiveBanners`: فعال + بازه‌ی زمانی، `use cache` ۱ دقیقه + تگ `banners`)، `admin/{queries,actions}` (ذخیره، روشن/خاموش، جابه‌جایی ترتیب، حذف؛ همه با AuditLog و `updateTag`)؛ تصویر: `modules/media/banner-image.ts` |
+| `analytics/` | آنالیتیکس: `constants`، `classify` (دسته‌بندی مسیر/منبع/دستگاه؛ خالص و تست‌شده)، `schemas`، `cookie`، `service` (ثبت رویداد)، `admin/queries.ts` (گزارش)؛ UI: `components/analytics/{analytics-tracker,report-blocks}.tsx`؛ `app/api/analytics`؛ صفحه‌ی `admin/(panel)/analytics` |
 | `dashboard/` · `audit/` | کوئری‌های داشبورد · گزارش تغییرات |
 
 ## `lib/`

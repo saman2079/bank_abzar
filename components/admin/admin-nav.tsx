@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Boxes, ClipboardList, Images, MessageCircle, FileText, LayoutDashboard, Newspaper, Package, ScrollText, Settings, Tags, Users, Warehouse } from "lucide-react";
+import { BarChart3, Boxes, ClipboardList, Images, MessageCircle, FileText, LayoutDashboard, Newspaper, Package, ScrollText, Settings, Tags, Users, Warehouse } from "lucide-react";
 import type { Role } from "@/modules/auth/constants";
 import { ChatNavBadge } from "@/components/admin/chat-nav-badge";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/admin", label: "داشبورد", Icon: LayoutDashboard, adminOnly: false },
+  { href: "/admin/analytics", label: "آمار و تحلیل", Icon: BarChart3, adminOnly: true },
   { href: "/admin/orders", label: "سفارش‌ها", Icon: ClipboardList, adminOnly: false },
   { href: "/admin/invoices", label: "فاکتورها", Icon: FileText, adminOnly: false },
   { href: "/admin/chat", label: "گفتگوها", Icon: MessageCircle, adminOnly: false },
